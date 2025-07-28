@@ -9,6 +9,5 @@ type Championship struct {
 	StartDate time.Time `json:"start_date"`
 	EndDate   time.Time `json:"end_date"`
 	Matches   []Match   `gorm:"foreignKey:ChampionshipID" json:"matches"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Base
 }
