@@ -23,7 +23,9 @@ func InitDB() *gorm.DB {
 		&gorm.Config{},
 	)
 
-	handler.New("DB_CONN_ERROR", "Error connecting to the database: ", err)
+	if err != nil {
+		handler.NewDBConnectionError(err)
+	}
 
 	return db
 }

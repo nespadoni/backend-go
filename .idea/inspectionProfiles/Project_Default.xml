@@ -12,6 +12,12 @@
         <function importPath="math/rand" name="Read" />
         <function importPath="errors" name="Unwrap" />
         <function importPath="backend-go/handler" name="New" />
+        <function importPath="backend-go/handler" name="NewDBConnectionError" />
+        <function importPath="backend-go/handler" name="NewConverterError" />
+        <function importPath="backend-go/handler" name="NewReadError" />
+        <function importPath="backend-go/handler" name="NewCreateError" />
+        <function importPath="backend-go/handler" name="NewUpdateError" />
+        <function importPath="backend-go/handler" name="NewDeleteError" />
       </functions>
     </inspection_tool>
   </profile>
