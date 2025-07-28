@@ -10,7 +10,8 @@ type User struct {
 	Email     string    `gorm:"size:100;not null" json:"email"`
 	Password  string    `gorm:"size:100;not null" json:"-"`
 	Phone     string    `gorm:"size:100;not null" json:"phone"`
-	Role      string    `gorm:"size:20;not null" json:"role"`
+	Role      string    `gorm:"size:20;not null" json:"role"` // "admin" ou "user"
+	AthleteID *uint     `json:"athlete_id,omitempty"`         // Se for jogador
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
