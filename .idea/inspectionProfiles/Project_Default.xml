@@ -18,6 +18,7 @@
         <function importPath="backend-go/handler" name="NewCreateError" />
         <function importPath="backend-go/handler" name="NewUpdateError" />
         <function importPath="backend-go/handler" name="NewDeleteError" />
+        <function importPath="github.com/nespadoni/goerror/goerror" name="NovoErroBancoDados" />
       </functions>
     </inspection_tool>
     <inspection_tool class="GrazieInspection" enabled="false" level="GRAMMAR_ERROR" enabled_by_default="false" />
