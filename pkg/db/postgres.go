@@ -1,7 +1,11 @@
 package db
 
 import (
-	"fmt"
+	"backend-go/internal/championship"
+	"backend-go/internal/match"
+	"backend-go/internal/result"
+	"backend-go/internal/sport"
+	"backend-go/internal/tournament"
 	"log"
 	"os"
 
@@ -16,24 +20,21 @@ func InitDB() *gorm.DB {
 		log.Println("Aviso: Arquivo .env não encontrado, usando variáveis de ambiente do sistema.")
 	}
 
-	// Lê variáveis
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	sslmode := os.Getenv("DB_SSLMODE")
-
-	// Monta conexão
-	connectionString := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		host, port, user, password, dbname, sslmode,
-	)
-
-	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
+	dsn := os.Getenv("dsn")
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Falha ao conectar no banco: %v", err)
 	}
 
+	Migrate(db)
+
 	return db
+}
+
+func Migrate(database *gorm.DB) {
+
+	if err := database.Debug().AutoMigrate(&championship.Championship{}, &sport.Sport{}, &tournament.Tournament{}, &match.Match{}, &result.Result{}); err != nil {
+		log.Fatalf("Erro ao Executar o Migrations: %v", err)
+	}
+
 }
