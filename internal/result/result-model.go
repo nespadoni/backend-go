@@ -16,3 +16,5 @@ type Result struct {
 	IsLive     bool        `gorm:"default:false" json:"is_live"`
 	UpdatedAt  time.Time   `json:"updated_at"`
 }
+
+// SERA QUE FUNCIONOU?

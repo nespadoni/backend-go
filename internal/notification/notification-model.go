@@ -14,3 +14,5 @@ type Notification struct {
 	IsRead    bool      `gorm:"default:false" json:"is_read"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+// SERA QUE FUNCIONOU?
