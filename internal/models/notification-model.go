@@ -1,12 +1,11 @@
-package notification
+package models
 
 import (
-	"backend-go/internal/base"
 	"time"
 )
 
 type Notification struct {
-	base.Base
+	Base
 	UserID    uint      `json:"user_id"`
 	Title     string    `gorm:"size:200;not null" json:"title"`
 	Message   string    `gorm:"type:text;not null" json:"message"`
@@ -14,5 +13,3 @@ type Notification struct {
 	IsRead    bool      `gorm:"default:false" json:"is_read"`
 	CreatedAt time.Time `json:"created_at"`
 }
-
-// SERA QUE FUNCIONOU?

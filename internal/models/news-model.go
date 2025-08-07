@@ -1,11 +1,7 @@
-package news
-
-import (
-	"backend-go/internal/base"
-)
+package models
 
 type News struct {
-	base.Base
+	Base
 	Title      string `gorm:"size:200;not null" json:"title"`
 	Content    string `gorm:"type:text;not null" json:"content"`
 	AthleticID uint   `json:"athletic_id"` // FK -> Atlética

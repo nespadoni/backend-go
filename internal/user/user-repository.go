@@ -1,60 +1,88 @@
 package user
 
 import (
-	"github.com/nespadoni/goerror"
+	"backend-go/internal/models"
+
 	"gorm.io/gorm"
 )
 
-type UsuarioRepository struct {
+type UserRepository struct {
 	DB *gorm.DB
 }
 
-func NovoRepositorioUsuario(db *gorm.DB) *UsuarioRepository {
-	return &UsuarioRepository{DB: db}
+func NewUserRepository(db *gorm.DB) *UserRepository {
+	return &UserRepository{DB: db}
 }
 
-func (r *UsuarioRepository) BuscarTodos() []Usuario {
-	var usuarios []Usuario
-	resultado := r.DB.Find(&usuarios)
-	goerror.EhErroBancoDados(resultado)
-	return usuarios
+func (r *UserRepository) FindAll() ([]models.User, error) {
+	var usuarios []models.User
+	if resultado := r.DB.Find(&usuarios); resultado.Error != nil {
+		return usuarios, resultado.Error
+	}
+
+	return usuarios, nil
 }
 
-func (r *UsuarioRepository) BuscarPorId(id int) Usuario {
-	var usuario Usuario
+func (r *UserRepository) GetById(id int) (models.User, error) {
+	var usuario models.User
 	resultado := r.DB.Where("ID = ?", id).Find(&usuario)
-	goerror.EhErroBancoDados(resultado)
-	return usuario
+
+	if resultado.Error != nil {
+		return usuario, resultado.Error
+	}
+
+	return usuario, nil
 }
 
-func (r *UsuarioRepository) BuscarPorNome(nome string) Usuario {
-	var usuario Usuario
+func (r *UserRepository) BuscarPorNome(nome string) (models.User, error) {
+	var usuario models.User
 	resultado := r.DB.Where("Nome = ?", nome).Find(&usuario)
-	goerror.EhErroBancoDados(resultado)
-	return usuario
+	if resultado.Error != nil {
+		return usuario, resultado.Error
+	}
+	return usuario, nil
 }
 
-func (r *UsuarioRepository) BuscarPorEmail(email string) Usuario {
-	var usuario Usuario
+func (r *UserRepository) BuscarPorEmail(email string) (models.User, error) {
+	var usuario models.User
 	resultado := r.DB.Where("Email = ?", email).Find(&usuario)
-	goerror.EhErroBancoDados(resultado)
-	return usuario
+
+	if resultado.Error != nil {
+		return usuario, resultado.Error
+	}
+
+	return usuario, nil
 }
 
-func (r *UsuarioRepository) SalvarUsuario(usuario Usuario) Usuario {
+func (r *UserRepository) SaveUser(usuario models.User) (models.User, error) {
 	resultado := r.DB.Create(&usuario)
-	goerror.EhErroBancoDados(resultado)
-	return usuario
+
+	if resultado.Error != nil {
+		return usuario, resultado.Error
+	}
+
+	return usuario, nil
+
 }
 
-func (r *UsuarioRepository) AtualizarUsuario(id int, novoUsuario Usuario) {
-	resultado := r.DB.Where("id = ?", id).Updates(novoUsuario)
-	goerror.EhErroBancoDados(resultado)
+func (r *UserRepository) AtualizarUsuario(id int, novoUsuario models.User) (models.User, error) {
+	resultado := r.DB.Where("id = ?", id).Updates(&novoUsuario)
+
+	if resultado.Error != nil {
+		return novoUsuario, resultado.Error
+	}
+
+	return novoUsuario, nil
 
 }
 
-func (r *UsuarioRepository) DeletarUsuario(id int) {
-	usuario := Usuario{}
+func (r *UserRepository) DeleteUser(id int) error {
+	usuario := models.User{}
 	resultado := r.DB.Where("id = ?", id).Delete(&usuario)
-	goerror.EhErroBancoDados(resultado)
+
+	if resultado.Error != nil {
+		return resultado.Error
+	}
+
+	return nil
 }

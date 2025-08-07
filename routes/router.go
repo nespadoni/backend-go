@@ -2,28 +2,42 @@ package routes
 
 import (
 	"backend-go/internal/championship"
+	"backend-go/internal/user"
 	"backend-go/pkg/db"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 )
 
 func InitRouter() {
 	database := db.InitDB()
 
+	championController := startChampionship(database)
+	userController := startUser(database)
+
+	r := gin.Default()
+
+	r.GET("/championship", championController.GetChampionship)
+
+	r.GET("/user/:id", userController.FindById)
+
+	r.Run()
+}
+
+func startChampionship(database *gorm.DB) championship.ChampionshipController {
 	championRepo := championship.NewChampionshipRepository(database)
 	championService := championship.NewChampionshipService(championRepo)
 	championController := championship.NewChampionshipController(championService)
 
-	r := gin.Default()
+	return *championController
+}
 
-	r.GET("/championship", func(ctx *gin.Context) {
-		championship, err := championController.GetChampionship()
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, championship)
-		}
-		ctx.JSON(http.StatusOK, championship)
-	})
+func startUser(database *gorm.DB) user.UserController {
+	validate := validator.Validate{}
+	userRepo := user.NewUserRepository(database)
+	userService := user.NewUserService(userRepo, &validate)
+	userController := user.NewUserController(userService)
 
-	r.Run()
+	return *userController
 }

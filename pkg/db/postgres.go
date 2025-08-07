@@ -1,11 +1,7 @@
 package db
 
 import (
-	"backend-go/internal/championship"
-	"backend-go/internal/match"
-	"backend-go/internal/result"
-	"backend-go/internal/sport"
-	"backend-go/internal/tournament"
+	"backend-go/internal/models"
 	"log"
 	"os"
 
@@ -33,8 +29,32 @@ func InitDB() *gorm.DB {
 
 func Migrate(database *gorm.DB) {
 
-	if err := database.Debug().AutoMigrate(&championship.Championship{}, &sport.Sport{}, &tournament.Tournament{}, &match.Match{}, &result.Result{}); err != nil {
+	if err := database.Debug().AutoMigrate(&models.Championship{},
+		&models.Sport{},
+		&models.Tournament{},
+		&models.Role{},
+		&models.University{},
+		&models.User{},
+		&models.Userchampionship{},
+		&models.Match{},
+		&models.Result{}); err != nil {
 		log.Fatalf("Erro ao Executar o Migrations: %v", err)
+	}
+
+	var count int64
+
+	database.Model(&models.Role{}).Count(&count)
+
+	if count == 0 {
+		adminRole := models.Role{
+			Name: "ADM", Description: "MASTER ROLE", Admin: true,
+		}
+		database.Create(&adminRole)
+
+		userRole := models.Role{
+			Name: "USER", Description: "NORMAL ROLE", Admin: false,
+		}
+		database.Create(&userRole)
 	}
 
 }
