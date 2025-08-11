@@ -41,11 +41,13 @@ func Migrate(database *gorm.DB) {
 		log.Fatalf("Erro ao Executar o Migrations: %v", err)
 	}
 
-	var count int64
+	var countRoles int64
+	var countUniversities int64
 
-	database.Model(&models.Role{}).Count(&count)
+	database.Model(&models.Role{}).Count(&countRoles)
+	database.Model(&models.University{}).Count(&countUniversities)
 
-	if count == 0 {
+	if countRoles == 0 {
 		adminRole := models.Role{
 			Name: "ADM", Description: "MASTER ROLE", Admin: true,
 		}
@@ -57,4 +59,20 @@ func Migrate(database *gorm.DB) {
 		database.Create(&userRole)
 	}
 
+	if countUniversities == 0 {
+		univag := models.University{
+			Name: "UNIVAG",
+		}
+		database.Create(&univag)
+
+		unic := models.University{
+			Name: "UNIC",
+		}
+		database.Create(&unic)
+
+		ufmt := models.University{
+			Name: "UFMT",
+		}
+		database.Create(&ufmt)
+	}
 }

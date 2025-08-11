@@ -19,9 +19,11 @@ func InitRouter() {
 	r := gin.Default()
 
 	r.GET("/championship", championController.GetChampionship)
-
 	r.GET("/user/:id", userController.FindById)
-
+	r.GET("/user", userController.FindAll)
+	r.DELETE("/user/:id", userController.DeleteUser)
+	r.POST("/user", userController.PostUser)
+	r.PUT("/user/:id", userController.UpdateUser)
 	r.Run()
 }
 
@@ -34,9 +36,9 @@ func startChampionship(database *gorm.DB) championship.ChampionshipController {
 }
 
 func startUser(database *gorm.DB) user.UserController {
-	validate := validator.Validate{}
+	validate := validator.New()
 	userRepo := user.NewUserRepository(database)
-	userService := user.NewUserService(userRepo, &validate)
+	userService := user.NewUserService(userRepo, validate)
 	userController := user.NewUserController(userService)
 
 	return *userController

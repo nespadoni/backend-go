@@ -2,6 +2,7 @@ package user
 
 import (
 	"backend-go/internal/models"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -54,26 +55,38 @@ func (r *UserRepository) BuscarPorEmail(email string) (models.User, error) {
 	return usuario, nil
 }
 
-func (r *UserRepository) SaveUser(usuario models.User) (models.User, error) {
+func (r *UserRepository) SaveUser(usuario *models.User) error {
+	var userRole models.Role
+	//ID 2 É o padrão de usuário normal
+	r.DB.Where("ID = ?", 2).Find(&userRole)
+	usuario.Role = userRole
+	usuario.RoleID = userRole.ID
+
 	resultado := r.DB.Create(&usuario)
 
 	if resultado.Error != nil {
-		return usuario, resultado.Error
+		return resultado.Error
 	}
 
-	return usuario, nil
+	err := r.DB.Preload("University").First(&usuario, usuario.ID)
+	if err != nil {
+		return err.Error
+	}
 
+	return nil
 }
 
-func (r *UserRepository) AtualizarUsuario(id int, novoUsuario models.User) (models.User, error) {
-	resultado := r.DB.Where("id = ?", id).Updates(&novoUsuario)
-
+func (r *UserRepository) AtualizarUsuario(id string, usuario *models.User) error {
+	fmt.Println("ID STRING :", id)
+	resultado := r.DB.Where("id = ?", id).Updates(&usuario)
 	if resultado.Error != nil {
-		return novoUsuario, resultado.Error
+		return resultado.Error
 	}
 
-	return novoUsuario, nil
+	r.DB.Where("ID = ?", id).Preload("University").Preload("Role").First(&usuario)
+	fmt.Println("DEPOIS DO FIRST", usuario)
 
+	return nil
 }
 
 func (r *UserRepository) DeleteUser(id int) error {
