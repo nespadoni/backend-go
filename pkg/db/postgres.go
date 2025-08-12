@@ -35,28 +35,70 @@ func Migrate(database *gorm.DB) {
 		&models.Role{},
 		&models.University{},
 		&models.User{},
-		&models.Userchampionship{},
+		&models.Athletic{},
+		&models.UserRoleAthletic{},
 		&models.Match{},
 		&models.Result{}); err != nil {
 		log.Fatalf("Erro ao Executar o Migrations: %v", err)
 	}
+	//Cria os principais Registros
+	mainData(database)
+}
 
+func mainData(database *gorm.DB) {
 	var countRoles int64
 	var countUniversities int64
+	var countUsers int64
 
 	database.Model(&models.Role{}).Count(&countRoles)
 	database.Model(&models.University{}).Count(&countUniversities)
+	database.Model(&models.User{}).Count(&countUsers)
 
-	if countRoles == 0 {
+	if countRoles == 0 && countUsers == 0 {
+		//Role ADM
 		adminRole := models.Role{
 			Name: "ADM", Description: "MASTER ROLE", Admin: true,
 		}
-		database.Create(&adminRole)
 
+		result := database.Create(&adminRole)
+		if result.Error != nil {
+			log.Fatalf("Erro ao criar o registro: %v", result.Error)
+		}
+
+		//Role NORMAL
 		userRole := models.Role{
 			Name: "USER", Description: "NORMAL ROLE", Admin: false,
 		}
-		database.Create(&userRole)
+
+		result = database.Create(&userRole)
+		if result.Error != nil {
+			log.Fatalf("Erro ao criar o registro: %v", result.Error)
+		}
+
+		//USUÁRIO
+		user := models.User{
+			Name:      "admin",
+			Email:     "admin",
+			Password:  "admin",
+			Telephone: "99999999"}
+
+		result = database.Create(&user)
+		if result.Error != nil {
+			log.Fatalf("Erro ao criar o registro: %v", result.Error)
+		}
+
+		//USUARIO ROLE, SEM ATLETICA PORQUE SERA O USUARIO MASTER
+		var athleticID *int
+		user_role_athletic := models.UserRoleAthletic{
+			UserID:     user.ID,
+			RoleID:     adminRole.ID,
+			AthleticID: athleticID,
+		}
+
+		result = database.Create(&user_role_athletic)
+		if result.Error != nil {
+			log.Fatalf("Erro ao criar o registro: %v", result.Error)
+		}
 	}
 
 	if countUniversities == 0 {
@@ -73,6 +115,10 @@ func Migrate(database *gorm.DB) {
 		ufmt := models.University{
 			Name: "UFMT",
 		}
-		database.Create(&ufmt)
+
+		result := database.Create(&ufmt)
+		if result.Error != nil {
+			log.Fatalf("Erro ao criar o registro: %v", result.Error)
+		}
 	}
 }

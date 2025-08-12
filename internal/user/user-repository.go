@@ -56,11 +56,6 @@ func (r *UserRepository) BuscarPorEmail(email string) (models.User, error) {
 }
 
 func (r *UserRepository) SaveUser(usuario *models.User) error {
-	var userRole models.Role
-	//ID 2 É o padrão de usuário normal
-	r.DB.Where("ID = ?", 2).Find(&userRole)
-	usuario.Role = userRole
-	usuario.RoleID = userRole.ID
 
 	resultado := r.DB.Create(&usuario)
 
