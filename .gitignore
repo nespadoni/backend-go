@@ -1,0 +1,118 @@
+# Binários compilados do Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/main
+/app
+/backend-go
+/rivaly
+
+# Arquivos de teste
+*.test
+
+# Arquivos de output
+*.out
+
+# Dependências vendorizadas do Go
+vendor/
+
+# Arquivos de módulos Go (se não estiver usando Go modules)
+go.sum.bak
+
+# Arquivos de configuração sensíveis
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.env
+config.json
+config.yaml
+config.yml
+
+# Logs
+*.log
+logs/
+log/
+
+# Arquivos temporários
+*.tmp
+*.temp
+/tmp/
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos do sistema operacional
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Arquivos de backup
+*.bak
+*.backup
+*.old
+
+# Certificados SSL/TLS
+*.pem
+*.key
+*.crt
+*.cert
+
+# Arquivos de deploy/infraestrutura
+docker-compose.override.yml
+.docker/
+kubernetes/secrets/
+
+# Arquivos de banco de dados locais
+*.db
+*.sqlite
+*.sqlite3
+/data/
+/database/
+
+# Arquivos de cache
+.cache/
+*.cache
+
+# Arquivos de documentação gerados
+/docs/generated/
+/swagger-ui/
+
+# Arquivos de profiling
+*.prof
+*.pprof
+
+# Arquivos de coverage
+*.cover
+coverage.out
+coverage.html
+
+# Arquivos de CI/CD específicos (se não quiser versionar)
+# .github/
+# .gitlab-ci.yml
+
+# Arquivos de upload/mídia (se aplicável)
+/uploads/
+/media/
+/public/uploads/
+
+# Node.js (se você tiver frontend também)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos específicos do Air (hot reload)
+.air.toml
+tmp/
