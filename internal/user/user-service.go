@@ -22,81 +22,85 @@ func NewUserService(repo *UserRepository, validate *validator.Validate) *UserSer
 
 func (s *UserService) GetAll() ([]UserResponse, error) {
 	users, err := s.repo.FindAll()
+	if err != nil {
+		return nil, fmt.Errorf("erro no serviço ao buscar usuários: %w", err)
+	}
 
 	var userResponses []UserResponse
-	if erro := copier.Copy(&userResponses, users); erro != nil {
-		return nil, err
+	if err := copier.Copy(&userResponses, users); err != nil {
+		return nil, fmt.Errorf("erro ao converter dados: %w", err)
 	}
 
 	return userResponses, nil
 }
 
-func (s *UserService) GetById(userId int) (UserResponse, error) {
-
-	user, err := s.repo.GetById(userId)
+func (s *UserService) GetById(userID int) (UserResponse, error) {
+	user, err := s.repo.GetById(userID)
 	if err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("erro no serviço ao buscar usuário: %w", err)
 	}
 
 	var userResponse UserResponse
 	if err := copier.Copy(&userResponse, user); err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("erro ao converter dados: %w", err)
 	}
 
 	return userResponse, nil
 }
 
 func (s *UserService) CreateUser(req CreateUserRequest) (UserResponse, error) {
+	// Validar request
 	if err := s.validate.Struct(req); err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("dados inválidos: %w", err)
 	}
 
+	// Verificar se email já existe
+	_, err := s.repo.GetByEmail(req.Email)
+	if err == nil {
+		return UserResponse{}, fmt.Errorf("email %s já está em uso", req.Email)
+	}
+
+	// Criar novo usuário
 	var newUser models.User
 	if err := copier.Copy(&newUser, &req); err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("erro ao processar dados: %w", err)
 	}
 
-	err := s.repo.SaveUser(&newUser)
-	if err != nil {
-		return UserResponse{}, err
+	if err := s.repo.Create(&newUser); err != nil {
+		return UserResponse{}, fmt.Errorf("erro ao criar usuário: %w", err)
 	}
 
 	var userResponse UserResponse
 	if err := copier.Copy(&userResponse, &newUser); err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("erro ao converter resposta: %w", err)
 	}
 
 	return userResponse, nil
 }
 
 func (s *UserService) UpdateUser(id string, req UpdateUserRequest) (UserResponse, error) {
+	// Validar request
 	if err := s.validate.Struct(&req); err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("dados inválidos: %w", err)
 	}
 
 	var user models.User
 	if err := copier.Copy(&user, &req); err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("erro ao processar dados: %w", err)
 	}
-	fmt.Println("User: ", user)
 
-	if err := s.repo.AtualizarUsuario(id, &user); err != nil {
-		return UserResponse{}, err
+	if err := s.repo.Update(id, &user); err != nil {
+		return UserResponse{}, fmt.Errorf("erro ao atualizar usuário: %w", err)
 	}
 
 	var userResponse UserResponse
 	if err := copier.Copy(&userResponse, &user); err != nil {
-		return UserResponse{}, err
+		return UserResponse{}, fmt.Errorf("erro ao converter resposta: %w", err)
 	}
 
 	return userResponse, nil
 }
 
-func (s *UserService) DeleteUser(userId int) error {
-
-	if err := s.repo.DeleteUser(userId); err != nil {
-		return err
-	}
-
-	return nil
+func (s *UserService) DeleteUser(userID int) error {
+	return s.repo.Delete(userID)
 }

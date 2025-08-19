@@ -2,94 +2,98 @@ package user
 
 import (
 	"backend-go/internal/models"
+	"errors"
 	"fmt"
+	"strconv"
 
 	"gorm.io/gorm"
 )
 
 type UserRepository struct {
-	DB *gorm.DB
+	db *gorm.DB
 }
 
 func NewUserRepository(db *gorm.DB) *UserRepository {
-	return &UserRepository{DB: db}
+	return &UserRepository{db: db}
 }
 
 func (r *UserRepository) FindAll() ([]models.User, error) {
-	var usuarios []models.User
-	if resultado := r.DB.Find(&usuarios); resultado.Error != nil {
-		return usuarios, resultado.Error
+	var users []models.User
+
+	if err := r.db.Preload("University").Find(&users).Error; err != nil {
+		return nil, fmt.Errorf("erro ao buscar usuários: %w", err)
 	}
 
-	return usuarios, nil
+	return users, nil
 }
 
 func (r *UserRepository) GetById(id int) (models.User, error) {
-	var usuario models.User
-	resultado := r.DB.Where("ID = ?", id).Find(&usuario)
+	var user models.User
 
-	if resultado.Error != nil {
-		return usuario, resultado.Error
-	}
-
-	return usuario, nil
-}
-
-func (r *UserRepository) BuscarPorNome(nome string) (models.User, error) {
-	var usuario models.User
-	resultado := r.DB.Where("Nome = ?", nome).Find(&usuario)
-	if resultado.Error != nil {
-		return usuario, resultado.Error
-	}
-	return usuario, nil
-}
-
-func (r *UserRepository) BuscarPorEmail(email string) (models.User, error) {
-	var usuario models.User
-	resultado := r.DB.Where("Email = ?", email).Find(&usuario)
-
-	if resultado.Error != nil {
-		return usuario, resultado.Error
-	}
-
-	return usuario, nil
-}
-
-func (r *UserRepository) SaveUser(usuario *models.User) error {
-
-	resultado := r.DB.Create(&usuario)
-
-	if resultado.Error != nil {
-		return resultado.Error
-	}
-
-	err := r.DB.Preload("University").First(&usuario, usuario.ID)
+	err := r.db.Preload("University").First(&user, id).Error
 	if err != nil {
-		return err.Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.User{}, fmt.Errorf("usuário com ID %d não encontrado", id)
+		}
+		return models.User{}, fmt.Errorf("erro ao buscar usuário: %w", err)
 	}
 
-	return nil
+	return user, nil
 }
 
-func (r *UserRepository) AtualizarUsuario(id string, usuario *models.User) error {
-	fmt.Println("ID STRING :", id)
-	resultado := r.DB.Where("id = ?", id).Updates(&usuario)
-	if resultado.Error != nil {
-		return resultado.Error
+func (r *UserRepository) GetByEmail(email string) (models.User, error) {
+	var user models.User
+
+	err := r.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.User{}, fmt.Errorf("usuário com email %s não encontrado", email)
+		}
+		return models.User{}, fmt.Errorf("erro ao buscar usuário por email: %w", err)
 	}
 
-	r.DB.Where("ID = ?", id).Preload("University").Preload("Role").First(&usuario)
-	fmt.Println("DEPOIS DO FIRST", usuario)
-
-	return nil
+	return user, nil
 }
 
-func (r *UserRepository) DeleteUser(id int) error {
-	usuario := models.User{}
-	resultado := r.DB.Where("id = ?", id).Delete(&usuario)
+func (r *UserRepository) Create(user *models.User) error {
+	if err := r.db.Create(user).Error; err != nil {
+		return fmt.Errorf("erro ao criar usuário: %w", err)
+	}
 
-	if resultado.Error != nil {
-		return resultado.Error
+	return r.db.Preload("University").First(user, user.ID).Error
+}
+
+func (r *UserRepository) Update(id string, user *models.User) error {
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		return fmt.Errorf("ID inválido: %w", err)
+	}
+
+	// Verificar se existe
+	if err := r.db.First(&models.User{}, userID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("usuário com ID %s não encontrado", id)
+		}
+		return fmt.Errorf("erro ao verificar usuário: %w", err)
+	}
+
+	// Atualizar
+	if err := r.db.Model(&models.User{}).Where("id = ?", userID).Updates(user).Error; err != nil {
+		return fmt.Errorf("erro ao atualizar usuário: %w", err)
+	}
+
+	// Recarregar com relacionamentos
+	return r.db.Preload("University").First(user, userID).Error
+}
+
+func (r *UserRepository) Delete(id int) error {
+	result := r.db.Delete(&models.User{}, id)
+	if result.Error != nil {
+		return fmt.Errorf("erro ao deletar usuário: %w", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("usuário com ID %d não encontrado", id)
 	}
 
 	return nil
