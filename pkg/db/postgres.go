@@ -3,6 +3,7 @@ package db
 import (
 	"backend-go/config"
 	"backend-go/internal/models"
+	"backend-go/internal/seeders"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
