@@ -1,5 +1,11 @@
 package championship
 
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
 type ChampionshipController struct {
 	service *ChampionshipService
 }
@@ -8,13 +14,13 @@ func NewChampionshipController(service *ChampionshipService) *ChampionshipContro
 	return &ChampionshipController{service: service}
 }
 
-func (controller *ChampionshipController) GetChampionship() ([]Championship, error) {
+func (controller *ChampionshipController) GetChampionship(ctx *gin.Context) {
 
 	championship, err := controller.service.FindChampionship()
 	if err != nil {
 
-		return championship, err
+		ctx.JSON(http.StatusBadRequest, championship)
 	}
 
-	return championship, err
+	ctx.JSON(http.StatusOK, championship)
 }
