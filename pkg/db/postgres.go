@@ -27,42 +27,52 @@ func InitDB(cfg config.DatabaseConfig) *gorm.DB {
 		log.Fatalf("Erro ao executar migrations: %v", err)
 	}
 
+	// IMPORTANTE: Executar seed das roles após as migrations
+	if err := seeders.SeedRoles(db); err != nil {
+		log.Fatalf("Erro ao executar seed das roles: %v", err)
+	}
+
 	log.Println("Conectado ao banco de dados com sucesso!")
 	return db
 }
 
 func autoMigrate(db *gorm.DB) error {
-	// Ordem das migrations é importante por causa das foreign keys
-	// Migra primeiro as tabelas sem dependências, depois as dependentes
-
 	log.Println("Executando migrations...")
 
 	return db.AutoMigrate(
-		// Tabelas base (sem foreign keys)
+		// Tabelas base
 		&models.University{},
 		&models.Role{},
 		&models.Sport{},
+
+		// Tabelas com dependências
+		&models.User{},
+		&models.Athletic{},
+		&models.Position{},
+
+		// Sistema social
+		&models.Follow{},
+		&models.Like{},
+		&models.Comment{},
+
+		// Conteúdo
+		&models.News{},
 		&models.Championship{},
+		&models.Tournament{},
 
-		// Tabelas com uma dependência
-		&models.User{},       // depende de University
-		&models.Athletic{},   // depende de University
-		&models.Position{},   // depende de Sport
-		&models.Tournament{}, // depende de Championship e Sport
+		// Times e jogadores
+		&models.Team{},
+		&models.Player{},
+		&models.Match{},
 
-		// Tabelas com múltiplas dependências
-		&models.Team{},   // depende de Athletic
-		&models.News{},   // depende de Athletic
-		&models.Follow{}, // depende de User
-		&models.Player{}, // depende de Team e User
-		&models.Match{},  // depende de Tournament
+		// Estatísticas
+		&models.Result{},
+		&models.Lineup{},
+		&models.PlayerStats{},
+		&models.TournamentMatch{},
 
-		// Tabelas de relacionamento e estatísticas
-		&models.UserRoleAthletic{}, // depende de User, Role e Athletic
-		&models.Result{},           // depende de Match
-		&models.Lineup{},           // depende de Match e Player
-		&models.PlayerStats{},      // depende de Player e Match
-		&models.TournamentMatch{},  // depende de Tournament e Match
-		&models.Notification{},     // depende de User
+		// Sistema de permissões
+		&models.UserRoleAthletic{},
+		&models.Notification{},
 	)
 }
