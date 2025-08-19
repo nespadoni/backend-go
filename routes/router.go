@@ -3,6 +3,7 @@ package routes
 import (
 	"backend-go/config"
 	docs "backend-go/docs"
+	"backend-go/internal/auth"
 	"backend-go/internal/championship"
 	"backend-go/internal/user"
 	"backend-go/pkg/middleware"
@@ -35,6 +36,8 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	// Controladores
 	championController := startChampionship(database)
 	userController := startUser(database)
+	permissionService := auth.NewPermissionService(database)
+	authMiddleware := auth.NewMiddleware(permissionService)
 
 	// Configuração do Swagger
 	docs.SwaggerInfo.BasePath = "/api"
@@ -43,12 +46,20 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	// Rotas da API
 	api := r.Group("/api")
 	{
-		api.GET("/championship", championController.GetChampionship)
-		api.GET("/user/:id", userController.FindById)
-		api.GET("/user", userController.FindAll)
-		api.DELETE("/user/:id", userController.DeleteUser)
-		api.POST("/user", userController.PostUser)
-		api.PUT("/user/:id", userController.UpdateUser)
+
+		championshipRoutes := api.Group("/championship")
+		{
+			championshipRoutes.GET("/", championController.GetChampionship)
+		}
+
+		userRoutes := api.Group("/user")
+		{
+			userRoutes.GET("/:id", userController.FindById, authMiddleware.RequireLevel(80))
+			userRoutes.GET("/", userController.FindAll)
+			userRoutes.DELETE("/:id", userController.DeleteUser)
+			userRoutes.POST("/", userController.PostUser)
+			userRoutes.PUT("/:id", userController.UpdateUser)
+		}
 	}
 
 	// Rota do Swagger
