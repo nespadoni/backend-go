@@ -1,124 +1,68 @@
 package db
 
 import (
+	"backend-go/config"
 	"backend-go/internal/models"
-	"log"
-	"os"
-
-	"github.com/joho/godotenv"
+	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
+	"log"
 )
 
-func InitDB() *gorm.DB {
-	// Carrega variáveis do .env
-	if err := godotenv.Load(); err != nil {
-		log.Println("Aviso: Arquivo .env não encontrado, usando variáveis de ambiente do sistema.")
+func InitDB(cfg config.DatabaseConfig) *gorm.DB {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
+
+	gormConfig := &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
 	}
 
-	dsn := os.Getenv("dsn")
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
-		log.Fatalf("Falha ao conectar no banco: %v", err)
+		log.Fatalf("Erro ao conectar com o banco de dados: %v", err)
 	}
 
-	Migrate(db)
+	if err := autoMigrate(db); err != nil {
+		log.Fatalf("Erro ao executar migrations: %v", err)
+	}
 
+	log.Println("Conectado ao banco de dados com sucesso!")
 	return db
 }
 
-func Migrate(database *gorm.DB) {
+func autoMigrate(db *gorm.DB) error {
+	// Ordem das migrations é importante por causa das foreign keys
+	// Migra primeiro as tabelas sem dependências, depois as dependentes
 
-	if err := database.Debug().AutoMigrate(&models.Championship{},
-		&models.Sport{},
-		&models.Tournament{},
-		&models.Role{},
+	log.Println("Executando migrations...")
+
+	return db.AutoMigrate(
+		// Tabelas base (sem foreign keys)
 		&models.University{},
-		&models.User{},
-		&models.Athletic{},
-		&models.UserRoleAthletic{},
-		&models.Match{},
-		&models.Result{}); err != nil {
-		log.Fatalf("Erro ao Executar o Migrations: %v", err)
-	}
-	//Cria os principais Registros
-	mainData(database)
-}
+		&models.Role{},
+		&models.Sport{},
+		&models.Championship{},
 
-func mainData(database *gorm.DB) {
-	var countRoles int64
-	var countUniversities int64
-	var countUsers int64
+		// Tabelas com uma dependência
+		&models.User{},       // depende de University
+		&models.Athletic{},   // depende de University
+		&models.Position{},   // depende de Sport
+		&models.Tournament{}, // depende de Championship e Sport
 
-	database.Model(&models.Role{}).Count(&countRoles)
-	database.Model(&models.University{}).Count(&countUniversities)
-	database.Model(&models.User{}).Count(&countUsers)
+		// Tabelas com múltiplas dependências
+		&models.Team{},   // depende de Athletic
+		&models.News{},   // depende de Athletic
+		&models.Follow{}, // depende de User
+		&models.Player{}, // depende de Team e User
+		&models.Match{},  // depende de Tournament
 
-	if countRoles == 0 && countUsers == 0 {
-		//Role ADM
-		adminRole := models.Role{
-			Name: "ADM", Description: "MASTER ROLE", Admin: true,
-		}
-
-		result := database.Create(&adminRole)
-		if result.Error != nil {
-			log.Fatalf("Erro ao criar o registro: %v", result.Error)
-		}
-
-		//Role NORMAL
-		userRole := models.Role{
-			Name: "USER", Description: "NORMAL ROLE", Admin: false,
-		}
-
-		result = database.Create(&userRole)
-		if result.Error != nil {
-			log.Fatalf("Erro ao criar o registro: %v", result.Error)
-		}
-
-		//USUÁRIO
-		user := models.User{
-			Name:      "admin",
-			Email:     "admin",
-			Password:  "admin",
-			Telephone: "99999999"}
-
-		result = database.Create(&user)
-		if result.Error != nil {
-			log.Fatalf("Erro ao criar o registro: %v", result.Error)
-		}
-
-		//USUARIO ROLE, SEM ATLETICA PORQUE SERA O USUARIO MASTER
-		var athleticID *int
-		user_role_athletic := models.UserRoleAthletic{
-			UserID:     user.ID,
-			RoleID:     adminRole.ID,
-			AthleticID: athleticID,
-		}
-
-		result = database.Create(&user_role_athletic)
-		if result.Error != nil {
-			log.Fatalf("Erro ao criar o registro: %v", result.Error)
-		}
-	}
-
-	if countUniversities == 0 {
-		univag := models.University{
-			Name: "UNIVAG",
-		}
-		database.Create(&univag)
-
-		unic := models.University{
-			Name: "UNIC",
-		}
-		database.Create(&unic)
-
-		ufmt := models.University{
-			Name: "UFMT",
-		}
-
-		result := database.Create(&ufmt)
-		if result.Error != nil {
-			log.Fatalf("Erro ao criar o registro: %v", result.Error)
-		}
-	}
+		// Tabelas de relacionamento e estatísticas
+		&models.UserRoleAthletic{}, // depende de User, Role e Athletic
+		&models.Result{},           // depende de Match
+		&models.Lineup{},           // depende de Match e Player
+		&models.PlayerStats{},      // depende de Player e Match
+		&models.TournamentMatch{},  // depende de Tournament e Match
+		&models.Notification{},     // depende de User
+	)
 }

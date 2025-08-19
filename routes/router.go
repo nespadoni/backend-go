@@ -1,30 +1,74 @@
 package routes
 
 import (
+	"backend-go/config"
+	docs "backend-go/docs"
 	"backend-go/internal/championship"
 	"backend-go/internal/user"
-	"backend-go/pkg/db"
+	"backend-go/pkg/middleware"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
-func InitRouter() {
-	database := db.InitDB()
+// InitRouter
+// @title Backend Rivaly API
+// @version 1.0
+// @description Esta é a API do Rivaly desenvolvida em Go + Gin
+// @host localhost:8080
+// @BasePath /
+func InitRouter(database *gorm.DB, cfg *config.Config) {
+	if cfg.Port == "80" || cfg.Port == "443" {
+		gin.SetMode(gin.ReleaseMode) // Produção
+	}
 
+	r := gin.New()
+
+	// Middlewares
+	r.Use(middleware.Logger())
+	r.Use(gin.Recovery())
+
+	// Controladores
 	championController := startChampionship(database)
 	userController := startUser(database)
 
-	r := gin.Default()
+	// Configuração do Swagger
+	docs.SwaggerInfo.BasePath = "/api"
+	docs.SwaggerInfo.Host = "localhost" + cfg.Port
 
-	r.GET("/championship", championController.GetChampionship)
-	r.GET("/user/:id", userController.FindById)
-	r.GET("/user", userController.FindAll)
-	r.DELETE("/user/:id", userController.DeleteUser)
-	r.POST("/user", userController.PostUser)
-	r.PUT("/user/:id", userController.UpdateUser)
-	r.Run()
+	// Rotas da API
+	api := r.Group("/api")
+	{
+		api.GET("/championship", championController.GetChampionship)
+		api.GET("/user/:id", userController.FindById)
+		api.GET("/user", userController.FindAll)
+		api.DELETE("/user/:id", userController.DeleteUser)
+		api.POST("/user", userController.PostUser)
+		api.PUT("/user/:id", userController.UpdateUser)
+	}
+
+	// Rota do Swagger
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Health check endpoint
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ok",
+			"message": "API está funcionando!",
+		})
+	})
+
+	// Inicia o servidor
+	log.Printf("Servidor rodando em http://localhost:%s", cfg.Port)
+	log.Printf("Swagger disponível em http://localhost:%s/swagger/index.html", cfg.Port)
+
+	if err := r.Run(":" + cfg.Port); err != nil {
+		log.Fatalf("Erro ao iniciar servidor: %v", err)
+	}
 }
 
 func startChampionship(database *gorm.DB) championship.ChampionshipController {
