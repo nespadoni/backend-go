@@ -2,6 +2,7 @@ package seeders
 
 import (
 	"backend-go/internal/models"
+	"errors"
 	"gorm.io/gorm"
 	"log"
 )
@@ -139,7 +140,7 @@ func SeedRoles(db *gorm.DB) error {
 
 		if result.Error != nil {
 			// Se não existe, cria
-			if result.Error == gorm.ErrRecordNotFound {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				if err := db.Create(&role).Error; err != nil {
 					log.Printf("Erro ao criar role %s: %v", role.Name, err)
 					return err
