@@ -2,17 +2,18 @@ package championship
 
 import (
 	"backend-go/internal/models"
+	"backend-go/internal/repository"
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
 )
 
 type ChampionshipRepository struct {
-	DB *gorm.DB
+	repository.BaseRepository
 }
 
 func NewChampionshipRepository(db *gorm.DB) *ChampionshipRepository {
-	return &ChampionshipRepository{DB: db}
+	return &ChampionshipRepository{BaseRepository: repository.BaseRepository{DB: db}}
 }
 
 func (repo *ChampionshipRepository) FindAll() ([]models.Championship, error) {
@@ -28,40 +29,28 @@ func (repo *ChampionshipRepository) FindAll() ([]models.Championship, error) {
 }
 
 func (r *ChampionshipRepository) Create(championship *models.Championship) error {
-	// Transação para garantir sincronismo
-	tx := r.DB.Begin()
-
-	defer func() {
-		if r := recover(); r != nil {
-			tx.Rollback()
+	return r.WithTransaction(func(tx *gorm.DB) error {
+		var athletic models.Athletic
+		if err := tx.First(&athletic, championship.AthleticID).Error; err != nil {
+			return fmt.Errorf("atlética não encontrada: %w", err)
 		}
-	}()
 
-	// Validar se o Athletic existe
-	var athletic models.Athletic
-	if err := tx.First(&athletic, championship.AthleticID).Error; err != nil {
-		tx.Rollback()
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("atlética com ID %d não encontrada", championship.AthleticID)
+		return tx.Create(championship).Error
+	})
+}
+
+func (r *ChampionshipRepository) Update(championship *models.Championship) error {
+	return r.WithTransaction(func(tx *gorm.DB) error {
+		var existing models.Championship
+
+		if err := tx.First(&existing, championship.ID).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("registro não encontado")
+			}
+
+			return fmt.Errorf("erro de banco: %w", err)
 		}
-		return fmt.Errorf("erro ao validar atlética: %w", err)
-	}
 
-	// Criar o championship
-	if err := tx.Create(championship).Error; err != nil {
-		tx.Rollback()
-		return fmt.Errorf("erro ao criar campeonatos: %w", err)
-	}
-
-	// Commit da transação
-	if err := tx.Commit().Error; err != nil {
-		return fmt.Errorf("erro ao confirmar transação: %w", err)
-	}
-
-	// Carrega o relacionamento de Athletic
-	if err := r.DB.Preload("Athletic").First(&championship, championship.ID).Error; err != nil {
-		return fmt.Errorf("campeonato criado, mas erro ao carregar dados da atlética: %w", err)
-	}
-
-	return nil
+		return tx.Save(championship).Error
+	})
 }
