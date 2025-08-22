@@ -7,12 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserController struct {
-	userService *UserService
+type Controller struct {
+	userService *Service
 }
 
-func NewUserController(userService *UserService) *UserController {
-	return &UserController{userService: userService}
+func NewUserController(userService *Service) *Controller {
+	return &Controller{userService: userService}
 }
 
 // ErrorResponse representa uma resposta de erro padronizada
@@ -32,7 +32,7 @@ type ErrorResponse struct {
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/user/{id} [get]
-func (c *UserController) FindById(ctx *gin.Context) {
+func (c *Controller) FindById(ctx *gin.Context) {
 	userIDStr := ctx.Param("id")
 
 	userID, err := strconv.Atoi(userIDStr)
@@ -66,7 +66,7 @@ func (c *UserController) FindById(ctx *gin.Context) {
 // @Success 200 {array} UserResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/user [get]
-func (c *UserController) FindAll(ctx *gin.Context) {
+func (c *Controller) FindAll(ctx *gin.Context) {
 	users, err := c.userService.GetAll()
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse{
@@ -89,7 +89,7 @@ func (c *UserController) FindAll(ctx *gin.Context) {
 // @Success 201 {object} UserResponse
 // @Failure 400 {object} ErrorResponse
 // @Router /api/user [post]
-func (c *UserController) PostUser(ctx *gin.Context) {
+func (c *Controller) PostUser(ctx *gin.Context) {
 	var newUser CreateUserRequest
 	if err := ctx.ShouldBindJSON(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
@@ -123,7 +123,7 @@ func (c *UserController) PostUser(ctx *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/user/{id} [put]
-func (c *UserController) UpdateUser(ctx *gin.Context) {
+func (c *Controller) UpdateUser(ctx *gin.Context) {
 	idUser := ctx.Param("id")
 
 	var updateRequest UpdateUserRequest
@@ -158,7 +158,7 @@ func (c *UserController) UpdateUser(ctx *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 404 {object} ErrorResponse
 // @Router /api/user/{id} [delete]
-func (c *UserController) DeleteUser(ctx *gin.Context) {
+func (c *Controller) DeleteUser(ctx *gin.Context) {
 	userIdStr := ctx.Param("id")
 
 	userId, err := strconv.Atoi(userIdStr)

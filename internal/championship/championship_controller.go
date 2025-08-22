@@ -6,15 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ChampionshipController struct {
-	service *ChampionshipService
+type Controller struct {
+	service *Service
 }
 
-func NewChampionshipController(service *ChampionshipService) *ChampionshipController {
-	return &ChampionshipController{service: service}
+func NewChampionshipController(service *Service) *Controller {
+	return &Controller{service: service}
 }
 
-func (controller *ChampionshipController) GetChampionship(ctx *gin.Context) {
+func (controller *Controller) GetChampionship(ctx *gin.Context) {
 
 	championship, err := controller.service.FindChampionship()
 	if err != nil {

@@ -82,7 +82,7 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	}
 }
 
-func startChampionship(database *gorm.DB) championship.ChampionshipController {
+func startChampionship(database *gorm.DB) championship.Controller {
 	championRepo := championship.NewChampionshipRepository(database)
 	championService := championship.NewChampionshipService(championRepo)
 	championController := championship.NewChampionshipController(championService)
@@ -90,7 +90,7 @@ func startChampionship(database *gorm.DB) championship.ChampionshipController {
 	return *championController
 }
 
-func startUser(database *gorm.DB) user.UserController {
+func startUser(database *gorm.DB) user.Controller {
 	validate := validator.New()
 	userRepo := user.NewUserRepository(database)
 	userService := user.NewUserService(userRepo, validate)

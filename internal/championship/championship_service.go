@@ -2,15 +2,15 @@ package championship
 
 import "backend-go/internal/models"
 
-type ChampionshipService struct {
-	repo ChampionshipRepository
+type Service struct {
+	repo Repository
 }
 
-func NewChampionshipService(repo *ChampionshipRepository) *ChampionshipService {
-	return &ChampionshipService{repo: *repo}
+func NewChampionshipService(repo *Repository) *Service {
+	return &Service{repo: *repo}
 }
 
-func (service ChampionshipService) FindChampionship() ([]models.Championship, error) {
+func (service Service) FindChampionship() ([]models.Championship, error) {
 
 	championship, err := service.repo.FindAll()
 	if err != nil {

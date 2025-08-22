@@ -8,15 +8,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type ChampionshipRepository struct {
+type Repository struct {
 	repository.BaseRepository
 }
 
-func NewChampionshipRepository(db *gorm.DB) *ChampionshipRepository {
-	return &ChampionshipRepository{BaseRepository: repository.BaseRepository{DB: db}}
+func NewChampionshipRepository(db *gorm.DB) *Repository {
+	return &Repository{BaseRepository: repository.BaseRepository{DB: db}}
 }
 
-func (r *ChampionshipRepository) FindAll() ([]models.Championship, error) {
+func (r *Repository) FindAll() ([]models.Championship, error) {
 	var championships []models.Championship
 
 	result := r.DB.Find(&championships)
@@ -28,7 +28,7 @@ func (r *ChampionshipRepository) FindAll() ([]models.Championship, error) {
 	return championships, nil
 }
 
-func (r *ChampionshipRepository) FindById(championship *models.Championship) (*models.Championship, error) {
+func (r *Repository) FindById(championship *models.Championship) (*models.Championship, error) {
 	var result models.Championship
 
 	if err := r.DB.First(&result, championship.ID).Error; err != nil {
@@ -41,7 +41,7 @@ func (r *ChampionshipRepository) FindById(championship *models.Championship) (*m
 	return &result, nil
 }
 
-func (r *ChampionshipRepository) Create(championship *models.Championship) error {
+func (r *Repository) Create(championship *models.Championship) error {
 	return r.WithTransaction(func(tx *gorm.DB) error {
 		var athletic models.Athletic
 		if err := tx.First(&athletic, championship.AthleticID).Error; err != nil {
@@ -52,34 +52,30 @@ func (r *ChampionshipRepository) Create(championship *models.Championship) error
 	})
 }
 
-func (r *ChampionshipRepository) Update(championship *models.Championship) error {
-	return r.WithTransaction(func(tx *gorm.DB) error {
-		var existing models.Championship
+func (r *Repository) Update(championship *models.Championship) error {
+	result := r.DB.Save(championship)
 
-		if err := tx.First(&existing, championship.ID).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return fmt.Errorf("registro não encontado")
-			}
+	if result.Error != nil {
+		return fmt.Errorf("erro ao deletar campeonato: %w", result.Error)
+	}
 
-			return fmt.Errorf("erro de banco: %w", err)
-		}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("campeonato não encontrado")
+	}
 
-		return tx.Save(championship).Error
-	})
+	return nil
 }
 
-func (r *ChampionshipRepository) Delete(championship *models.Championship) error {
-	return r.WithTransaction(func(tx *gorm.DB) error {
-		var existing models.Championship
+func (r *Repository) Delete(id uint) error {
+	result := r.DB.Delete(&models.Championship{}, id)
 
-		if err := tx.First(&existing, championship.ID).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return fmt.Errorf("registro não encontrado")
-			}
+	if result.Error != nil {
+		return fmt.Errorf("erro ao deletar campeonato: %w", result.Error)
+	}
 
-			return fmt.Errorf("erro de banco: %w", err)
-		}
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("campeonato não encontrado")
+	}
 
-		return tx.Delete(championship).Error
-	})
+	return nil
 }

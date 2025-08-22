@@ -2,7 +2,7 @@ package user
 
 import "backend-go/internal/models"
 
-type UserResponse struct {
+type Response struct {
 	Id         int               `json:"id"`
 	Name       string            `json:"name"`
 	Email      string            `json:"email"`
