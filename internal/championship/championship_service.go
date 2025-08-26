@@ -62,3 +62,20 @@ func (s Service) Create(championship *models.Championship) (Response, error) {
 
 	return championshipResponse, nil
 }
+
+func (s Service) Update(id string, championship *models.Championship) (Response, error) {
+	if err := s.validate.Struct(&championship); err != nil {
+		return Response{}, fmt.Errorf("dados invalidos: %w", err)
+	}
+
+	if err := s.repo.Update(id, championship); err != nil {
+		return Response{}, fmt.Errorf("erro ao converter resposta: %w", err)
+	}
+
+	var championshipResponse Response
+	if err := copier.Copy(&championshipResponse, &championship); err != nil {
+		return Response{}, fmt.Errorf("erro ao converter resposta: %w", err)
+	}
+
+	return championshipResponse, nil
+}
