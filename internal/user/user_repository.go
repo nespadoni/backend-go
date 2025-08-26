@@ -86,14 +86,19 @@ func (r *Repository) Update(id string, user *models.User) error {
 	return r.db.Preload("University").First(user, userID).Error
 }
 
-func (r *Repository) Delete(id int) error {
-	result := r.db.Delete(&models.User{}, id)
+func (r *Repository) Delete(id string) error {
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		return fmt.Errorf("ID inválido: %w", err)
+	}
+
+	result := r.db.Delete(&models.User{}, userID)
 	if result.Error != nil {
 		return fmt.Errorf("erro ao deletar usuário: %w", result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("usuário com ID %d não encontrado", id)
+		return fmt.Errorf("usuário com ID %d não encontrado", userID)
 	}
 
 	return nil
