@@ -101,6 +101,5 @@ func (s *Service) UpdateUser(id string, req UpdateUserRequest) (Response, error)
 	return userResponse, nil
 }
 
-func (s *Service) DeleteUser(userID int) error {
-	return s.repo.Delete(userID)
-}
+//func (s *Service) DeleteUser(userID int) error {
+//}

@@ -46,4 +46,19 @@ func (s Service) Create(championship *models.Championship) (Response, error) {
 		return Response{}, fmt.Errorf("dados inválidos: %w", err)
 	}
 
+	var newChampionship models.Championship
+	if err := copier.Copy(&newChampionship, &championship); err != nil {
+		return Response{}, fmt.Errorf("erro ao processar dados: %w", err)
+	}
+
+	if err := s.repo.Create(&newChampionship); err != nil {
+		return Response{}, fmt.Errorf("erro ao criar usuario: %w", err)
+	}
+
+	var championshipResponse Response
+	if err := copier.Copy(&championshipResponse, &newChampionship); err != nil {
+		return Response{}, fmt.Errorf("erro ao converter resposta: %w", err)
+	}
+
+	return championshipResponse, nil
 }
