@@ -18,7 +18,7 @@ func NewChampionshipService(repo *Repository) *Service {
 	return &Service{repo: *repo}
 }
 
-func (s Service) FindAll() ([]models.Championship, error) {
+func (s *Service) FindAll() ([]models.Championship, error) {
 
 	championship, err := s.repo.FindAll()
 	if err != nil {
@@ -28,7 +28,7 @@ func (s Service) FindAll() ([]models.Championship, error) {
 	return championship, nil
 }
 
-func (s Service) FindById(championshipId *models.Championship) (Response, error) {
+func (s *Service) FindById(championshipId *models.Championship) (Response, error) {
 	championship, err := s.repo.FindById(championshipId)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro no serviço de buscar usuário: %w", err)
@@ -42,7 +42,7 @@ func (s Service) FindById(championshipId *models.Championship) (Response, error)
 	return champResponse, nil
 }
 
-func (s Service) Create(championship *models.Championship) (Response, error) {
+func (s *Service) Create(championship *models.Championship) (Response, error) {
 	if err := s.validate.Struct(championship); err != nil {
 		return Response{}, fmt.Errorf("dados inválidos: %w", err)
 	}
@@ -64,7 +64,7 @@ func (s Service) Create(championship *models.Championship) (Response, error) {
 	return championshipResponse, nil
 }
 
-func (s Service) Update(id int, championship *models.Championship) (Response, error) {
+func (s *Service) Update(id int, championship *models.Championship) (Response, error) {
 	if err := s.validate.Struct(&championship); err != nil {
 		return Response{}, fmt.Errorf("dados invalidos: %w", err)
 	}
@@ -81,10 +81,10 @@ func (s Service) Update(id int, championship *models.Championship) (Response, er
 	return championshipResponse, nil
 }
 
-func (s Service) Delete(id int) error {
+func (s *Service) Delete(id int) error {
 
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço de deletar campeonato com ID %s: %w", id, err)
+		return fmt.Errorf("erro no serviço de deletar campeonato com ID %d: %w", id, err)
 	}
 
 	return nil
