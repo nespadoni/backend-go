@@ -4,8 +4,8 @@ import (
 	"backend-go/config"
 	"backend-go/docs"
 	"backend-go/internal/auth"
-	"backend-go/internal/championship"
-	"backend-go/internal/user"
+	championship2 "backend-go/internal/modules/championship"
+	user2 "backend-go/internal/modules/user"
 	"backend-go/pkg/middleware"
 	"log"
 
@@ -87,19 +87,19 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	}
 }
 
-func startChampionship(database *gorm.DB) championship.Controller {
-	championRepo := championship.NewChampionshipRepository(database)
-	championService := championship.NewChampionshipService(championRepo)
-	championController := championship.NewChampionshipController(championService)
+func startChampionship(database *gorm.DB) championship2.Controller {
+	championRepo := championship2.NewChampionshipRepository(database)
+	championService := championship2.NewChampionshipService(championRepo)
+	championController := championship2.NewChampionshipController(championService)
 
 	return *championController
 }
 
-func startUser(database *gorm.DB) user.Controller {
+func startUser(database *gorm.DB) user2.Controller {
 	validate := validator.New()
-	userRepo := user.NewUserRepository(database)
-	userService := user.NewUserService(userRepo, validate)
-	userController := user.NewUserController(userService)
+	userRepo := user2.NewUserRepository(database)
+	userService := user2.NewUserService(userRepo, validate)
+	userController := user2.NewUserController(userService)
 
 	return *userController
 }
