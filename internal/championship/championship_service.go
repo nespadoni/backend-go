@@ -79,3 +79,12 @@ func (s Service) Update(id string, championship *models.Championship) (Response,
 
 	return championshipResponse, nil
 }
+
+func (s Service) Delete(id string) error {
+
+	if err := s.repo.Delete(id); err != nil {
+		return fmt.Errorf("erro no serviço de deletar campeonato com ID %s: %w", id, err)
+	}
+
+	return nil
+}
