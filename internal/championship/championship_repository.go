@@ -54,20 +54,28 @@ func (r *Repository) Create(championship *models.Championship) error {
 	})
 }
 
-func (r *Repository) Update(id int, championship *models.Championship) error {
+func (r *Repository) Update(id int, championship *models.Championship) (*models.Championship, error) {
+	// Verificar se existe no DB
 	if err := r.DB.First(&models.Championship{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("campeonato com ID %d não encontrado", id)
+			return nil, fmt.Errorf("campeonato com ID %d não encontrado", id)
 		}
-		return fmt.Errorf("erro ao verificar campeonato: %w", err)
+		return nil, fmt.Errorf("erro ao verificar campeonato: %w", err)
 	}
 
+	// Atualizar
 	if err := r.DB.Model(&models.Championship{}).Where("id = ?", id).Updates(championship).
 		Error; err != nil {
-		return fmt.Errorf("erro ao atualizar campeonato: %w", err)
+		return nil, fmt.Errorf("erro ao atualizar campeonato: %w", err)
 	}
 
-	return r.DB.Preload("Athletic").First(championship, id).Error
+	// Buscar o registro atualizado com relacionamento
+	var updatedChampionship models.Championship
+	if err := r.DB.Preload("Athletic").First(&updatedChampionship, id).Error; err != nil {
+		return nil, fmt.Errorf("erro ao buscar campeonato atualizado: %w", err)
+	}
+
+	return &updatedChampionship, nil
 
 }
 

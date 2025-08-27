@@ -76,3 +76,35 @@ func (c *Controller) Create(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, response)
 }
+
+func (c *Controller) Update(ctx *gin.Context) {
+	championshipIdStr := ctx.Param("Id")
+	championshipId, err := strconv.Atoi(championshipIdStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "internal_server_error",
+			Message: "Erro interno do servidor",
+		})
+		return
+	}
+
+	var updateRequest UpdateRequest
+	if err := ctx.ShouldBindJSON(&updateRequest); err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_request_body",
+			Message: "Dados de atualização inválidos",
+		})
+		return
+	}
+
+	championship, err := c.service.Update(championshipId, updateRequest)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "update_failed",
+			Message: err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusOK, championship)
+
+}

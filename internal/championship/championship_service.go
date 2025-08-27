@@ -64,17 +64,29 @@ func (s *Service) Create(championship CreateRequest) (Response, error) {
 	return championshipResponse, nil
 }
 
-func (s *Service) Update(id int, championship *models.Championship) (Response, error) {
-	if err := s.validate.Struct(&championship); err != nil {
+func (s *Service) Update(id int, req UpdateRequest) (Response, error) {
+	if err := s.validate.Struct(&req); err != nil {
 		return Response{}, fmt.Errorf("dados invalidos: %w", err)
 	}
 
-	if err := s.repo.Update(id, championship); err != nil {
-		return Response{}, fmt.Errorf("erro ao converter resposta: %w", err)
+	// Validar datas
+	if err := s.validateDates(req.StartDate, req.EndDate); err != nil {
+		return Response{}, fmt.Errorf("datas inválidas: %w", err)
+	}
+
+	// Converter para Modelo
+	var championship models.Championship
+	if err := copier.Copy(&championship, &req); err != nil {
+		return Response{}, fmt.Errorf("erro ao processar dados: %w", err)
+	}
+
+	updatedChampionship, err := s.repo.Update(id, &championship)
+	if err != nil {
+		return Response{}, fmt.Errorf("erro ao atualiar campeonato: %w", err)
 	}
 
 	var championshipResponse Response
-	if err := copier.Copy(&championshipResponse, &championship); err != nil {
+	if err := copier.Copy(&championshipResponse, &updatedChampionship); err != nil {
 		return Response{}, fmt.Errorf("erro ao converter resposta: %w", err)
 	}
 
