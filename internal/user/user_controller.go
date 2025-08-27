@@ -21,42 +21,6 @@ type ErrorResponse struct {
 	Message string `json:"message,omitempty"`
 }
 
-// FindById godoc
-// @Summary Busca usuário por ID
-// @Description Retorna um usuário específico pelo seu ID
-// @Tags users
-// @Accept json
-// @Produce json
-// @Param id path string true "User ID"
-// @Success 200 {object} UserResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Router /api/user/{id} [get]
-func (c *Controller) FindById(ctx *gin.Context) {
-	userIDStr := ctx.Param("id")
-
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "invalid_user_id",
-			Message: "ID do usuário deve ser um número válido",
-		})
-		return // SEMPRE retornar após erro
-	}
-
-	response, err := c.userService.GetById(userID)
-	if err != nil {
-		// Aqui você deveria distinguir entre erro 404 (não encontrado) e 500 (erro interno)
-		ctx.JSON(http.StatusNotFound, ErrorResponse{
-			Error:   "user_not_found",
-			Message: "Usuário não encontrado",
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, response)
-}
-
 // FindAll godoc
 // @Summary Lista todos os usuários
 // @Description Retorna uma lista de todos os usuários
@@ -77,6 +41,42 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, users)
+}
+
+// FindById godoc
+// @Summary Busca usuário por ID
+// @Description Retorna um usuário específico pelo seu ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Success 200 {object} UserResponse
+// @Failure 400 {object} ErrorResponse
+// @Failure 404 {object} ErrorResponse
+// @Router /api/user/{id} [get]
+func (c *Controller) FindById(ctx *gin.Context) {
+	userIDStr := ctx.Param("id")
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_user_id",
+			Message: "ID do usuário deve ser um número válido",
+		})
+		return
+	}
+
+	response, err := c.userService.GetById(userID)
+	if err != nil {
+		// Aqui você deveria distinguir entre erro 404 (não encontrado) e 500 (erro interno)
+		ctx.JSON(http.StatusNotFound, ErrorResponse{
+			Error:   "user_not_found",
+			Message: "Usuário não encontrado",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
 }
 
 // PostUser godoc
