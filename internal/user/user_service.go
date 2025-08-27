@@ -78,7 +78,7 @@ func (s *Service) CreateUser(req CreateUserRequest) (Response, error) {
 	return userResponse, nil
 }
 
-func (s *Service) UpdateUser(id string, req UpdateUserRequest) (Response, error) {
+func (s *Service) UpdateUser(id int, req UpdateUserRequest) (Response, error) {
 	// Validar request
 	if err := s.validate.Struct(&req); err != nil {
 		return Response{}, fmt.Errorf("dados inválidos: %w", err)
@@ -101,9 +101,9 @@ func (s *Service) UpdateUser(id string, req UpdateUserRequest) (Response, error)
 	return userResponse, nil
 }
 
-func (s *Service) DeleteUser(id string) error {
+func (s *Service) DeleteUser(id int) error {
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço de deletar campeoanto com ID %s: %w", id, err)
+		return fmt.Errorf("erro no serviço de deletar campeoanto com ID %d: %w", id, err)
 	}
 
 	return nil

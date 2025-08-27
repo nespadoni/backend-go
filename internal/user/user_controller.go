@@ -124,7 +124,16 @@ func (c *Controller) PostUser(ctx *gin.Context) {
 // @Failure 404 {object} ErrorResponse
 // @Router /api/user/{id} [put]
 func (c *Controller) UpdateUser(ctx *gin.Context) {
-	idUser := ctx.Param("id")
+	idUserStr := ctx.Param("id")
+
+	userId, err := strconv.Atoi(idUserStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "invalid_user_id",
+			Message: "ID do usuário deve ser um número válido",
+		})
+		return
+	}
 
 	var updateRequest UpdateUserRequest
 	if err := ctx.ShouldBindJSON(&updateRequest); err != nil {
@@ -135,7 +144,7 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.userService.UpdateUser(idUser, updateRequest)
+	user, err := c.userService.UpdateUser(userId, updateRequest)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, ErrorResponse{
 			Error:   "update_failed",

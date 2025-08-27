@@ -4,7 +4,6 @@ import (
 	"backend-go/internal/models"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -63,42 +62,32 @@ func (r *Repository) Create(user *models.User) error {
 	return r.db.Preload("University").First(user, user.ID).Error
 }
 
-func (r *Repository) Update(id string, user *models.User) error {
-	userID, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("ID inválido: %w", err)
-	}
-
+func (r *Repository) Update(id int, user *models.User) error {
 	// Verificar se existe
-	if err := r.db.First(&models.User{}, userID).Error; err != nil {
+	if err := r.db.First(&models.User{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("usuário com ID %s não encontrado", id)
+			return fmt.Errorf("usuário com ID %d não encontrado", id)
 		}
 		return fmt.Errorf("erro ao verificar usuário: %w", err)
 	}
 
 	// Atualizar
-	if err := r.db.Model(&models.User{}).Where("id = ?", userID).Updates(user).Error; err != nil {
+	if err := r.db.Model(&models.User{}).Where("id = ?", id).Updates(user).Error; err != nil {
 		return fmt.Errorf("erro ao atualizar usuário: %w", err)
 	}
 
 	// Recarregar com relacionamentos
-	return r.db.Preload("University").First(user, userID).Error
+	return r.db.Preload("University").First(user, id).Error
 }
 
-func (r *Repository) Delete(id string) error {
-	userID, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("ID inválido: %w", err)
-	}
-
-	result := r.db.Delete(&models.User{}, userID)
+func (r *Repository) Delete(id int) error {
+	result := r.db.Delete(&models.User{}, id)
 	if result.Error != nil {
 		return fmt.Errorf("erro ao deletar usuário: %w", result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("usuário com ID %d não encontrado", userID)
+		return fmt.Errorf("usuário com ID %d não encontrado", id)
 	}
 
 	return nil
