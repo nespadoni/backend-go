@@ -3,6 +3,7 @@ package university
 import (
 	"backend-go/internal/models"
 	"backend-go/internal/repository"
+	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -16,6 +17,20 @@ func NewUniversityRepository(db *gorm.DB) *Repository {
 }
 
 func (r *Repository) FindAll() ([]models.University, error) {
-	var champions []models.University
+	var university []models.University
 
+	if err := r.DB.Find(&university).Error; err != nil {
+		return nil, fmt.Errorf("erro ao buscar universidades: %w", err)
+	}
+
+	return university, nil
+}
+
+func (r *Repository) FindById(id int) (models.University, error) {
+	var university models.University
+
+	if err := r.DB.First(&university, id).Error; err != nil {
+		return models.University{}, fmt.Errorf("universidade com ID %d não encontrado", id)
+	}
+	return university, nil
 }

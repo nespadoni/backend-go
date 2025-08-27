@@ -23,7 +23,7 @@ func (r *Repository) FindAll() ([]models.Championship, error) {
 	result := r.DB.Find(&championships)
 	if result.Error != nil {
 		// Retorna o erro quando houver problema na consulta
-		return nil, result.Error
+		return nil, fmt.Errorf("erro ao buscar campeonatos: %w", result.Error)
 	}
 
 	return championships, nil
