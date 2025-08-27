@@ -106,5 +106,24 @@ func (c *Controller) Update(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, championship)
+}
 
+func (c *Controller) Delete(ctx *gin.Context) {
+	championshipIdStr := ctx.Param("Id")
+	championshipId, err := strconv.Atoi(championshipIdStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "internal_server_error",
+			Message: "Erro interno do servidor",
+		})
+	}
+
+	if err := c.service.Delete(championshipId); err != nil {
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "championship_not_found",
+			Message: "Campeonato não encontrado",
+		})
+	}
+
+	ctx.Status(http.StatusOK)
 }
