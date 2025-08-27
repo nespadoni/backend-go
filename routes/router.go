@@ -2,14 +2,15 @@ package routes
 
 import (
 	"backend-go/config"
-	docs "backend-go/docs"
+	"backend-go/docs"
 	"backend-go/internal/auth"
 	"backend-go/internal/championship"
 	"backend-go/internal/user"
 	"backend-go/pkg/middleware"
+	"log"
+
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -49,7 +50,11 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 
 		championshipRoutes := api.Group("/championship")
 		{
-			championshipRoutes.GET("/", championController.GetChampionship)
+			championshipRoutes.GET("/", championController.FindAll)
+			championshipRoutes.GET("/:id", championController.FindById)
+			championshipRoutes.POST("/", championController.Create)
+			championshipRoutes.PUT("/:id", championController.Update)
+			championshipRoutes.DELETE("/:id", championController.Delete)
 		}
 
 		userRoutes := api.Group("/user")
