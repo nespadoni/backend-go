@@ -5,10 +5,11 @@ import (
 	"backend-go/internal/models"
 	"backend-go/internal/seeders"
 	"fmt"
+	"log"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"log"
 )
 
 func InitDB(cfg config.DatabaseConfig) *gorm.DB {
@@ -41,39 +42,46 @@ func autoMigrate(db *gorm.DB) error {
 	log.Println("Executando migrations...")
 
 	return db.AutoMigrate(
-		// Tabelas base
+		// === TABELAS BASE (sem dependências) ===
 		&models.University{},
-		&models.Role{},
 		&models.Sport{},
 
-		// Tabelas com dependências
-		&models.User{},
-		&models.Athletic{},
-		&models.Position{},
+		// === TABELAS COM DEPENDÊNCIAS SIMPLES ===
+		&models.Course{},   // depende de University
+		&models.Position{}, // depende de Sport
+		&models.User{},     // depende de University e Course
+		&models.Role{},     // pode depender de Athletic (circular, mas opcional)
 
-		// Sistema social
-		&models.Follow{},
-		&models.Like{},
-		&models.Comment{},
+		// === TABELAS DE NEGÓCIO ===
+		&models.Athletic{}, // depende de University e User (creator)
+		&models.Team{},     // depende de Athletic
 
-		// Conteúdo
-		&models.News{},
-		&models.Championship{},
-		&models.Tournament{},
+		// === CONTEÚDO ===
+		&models.News{},         // depende de Athletic e User (author)
+		&models.Championship{}, // depende de Athletic
+		&models.Tournament{},   // depende de Championship e Sport
 
-		// Times e jogadores
-		&models.Team{},
-		&models.Player{},
-		&models.Match{},
+		// === JOGADORES E PARTIDAS ===
+		&models.Player{}, // depende de Team, Position, User
+		&models.Match{},  // depende de Tournament e Team
 
-		// Estatísticas
-		&models.Result{},
-		&models.Lineup{},
-		&models.PlayerStats{},
-		&models.TournamentMatch{},
+		// === ESTATÍSTICAS E RESULTADOS ===
+		&models.Result{},      // depende de Match
+		&models.Lineup{},      // depende de Match e Player
+		&models.PlayerStats{}, // depende de Player e Match
 
-		// Sistema de permissões
-		&models.UserRoleAthletic{},
-		&models.Notification{},
+		// === SISTEMA SOCIAL ===
+		&models.Follow{},  // depende de User e Athletic
+		&models.Like{},    // depende de User (polimórfico)
+		&models.Comment{}, // depende de User (polimórfico e self-referencing)
+
+		// === SISTEMA DE PERMISSÕES ===
+		&models.UserRoleAthletic{}, // depende de User, Role, Athletic
+
+		// === SISTEMA DE NOTIFICAÇÕES ===
+		&models.Notification{}, // depende de User e Athletic
+
+		// === TABELAS ASSOCIATIVAS ===
+		&models.TournamentMatch{}, // depende de Tournament e Match
 	)
 }
