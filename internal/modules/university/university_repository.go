@@ -34,3 +34,11 @@ func (r *Repository) FindById(id int) (models.University, error) {
 	}
 	return university, nil
 }
+
+func (r *Repository) Create(university *models.University) error {
+	if err := r.DB.Create(university).Error; err != nil {
+		return fmt.Errorf("erro ao registrar universidade no banco de dados: %w", err)
+	}
+
+	return r.DB.First(university, university.ID).Error
+}
