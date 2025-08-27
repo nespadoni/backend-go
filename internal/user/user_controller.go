@@ -187,5 +187,5 @@ func (c *Controller) DeleteUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusNoContent) // 204 sem corpo de resposta
+	ctx.Status(http.StatusOK)
 }
