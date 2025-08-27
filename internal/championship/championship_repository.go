@@ -5,7 +5,6 @@ import (
 	"backend-go/internal/repository"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -54,35 +53,25 @@ func (r *Repository) Create(championship *models.Championship) error {
 	})
 }
 
-func (r *Repository) Update(id string, championship *models.Championship) error {
-	championshipId, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("ID invalido: %w", err)
-	}
-
-	if err := r.DB.First(&models.Championship{}, championshipId).Error; err != nil {
+func (r *Repository) Update(id int, championship *models.Championship) error {
+	if err := r.DB.First(&models.Championship{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return fmt.Errorf("campeonato com ID %s não encontrado", id)
 		}
 		return fmt.Errorf("erro ao verificar campeonato: %w", err)
 	}
 
-	if err := r.DB.Model(&models.Championship{}).Where("id = ?", championshipId).Updates(championship).
+	if err := r.DB.Model(&models.Championship{}).Where("id = ?", id).Updates(championship).
 		Error; err != nil {
 		return fmt.Errorf("erro ao atualizar campeonato: %w", err)
 	}
 
-	return r.DB.Preload("Athletic").First(championship, championshipId).Error
+	return r.DB.Preload("Athletic").First(championship, id).Error
 
 }
 
-func (r *Repository) Delete(id string) error {
-	championshipID, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("ID invalido: %w", err)
-	}
-
-	result := r.DB.Delete(&models.Championship{}, championshipID)
+func (r *Repository) Delete(id int) error {
+	result := r.DB.Delete(&models.Championship{}, id)
 
 	if result.Error != nil {
 		return fmt.Errorf("erro ao deletar campeonato: %w", result.Error)

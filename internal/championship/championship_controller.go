@@ -14,9 +14,9 @@ func NewChampionshipController(service *Service) *Controller {
 	return &Controller{service: service}
 }
 
-func (controller *Controller) GetChampionship(ctx *gin.Context) {
+func (controller *Controller) FindAll(ctx *gin.Context) {
 
-	championship, err := controller.service.FindChampionship()
+	championship, err := controller.service.FindAll()
 	if err != nil {
 
 		ctx.JSON(http.StatusBadRequest, championship)
