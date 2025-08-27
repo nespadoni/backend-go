@@ -29,17 +29,18 @@ func (r *Repository) FindAll() ([]models.Championship, error) {
 	return championships, nil
 }
 
-func (r *Repository) FindById(championship *models.Championship) (*models.Championship, error) {
-	var result models.Championship
+func (r *Repository) FindById(id int) (models.Championship, error) {
+	var championship models.Championship
 
-	if err := r.DB.First(&result, championship.ID).Error; err != nil {
+	if err := r.DB.Preload("Athletic").First(&championship, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("campeonato não encontrado")
+			return models.Championship{}, fmt.Errorf("campeonato com ID %d não encontrado", id)
 		}
-		return nil, fmt.Errorf("erro no banco de dados: %w", err)
+		return models.Championship{}, fmt.Errorf("erro ao buscar campeonato: %w", err)
 	}
 
-	return &result, nil
+	return championship, nil
+
 }
 
 func (r *Repository) Create(championship *models.Championship) error {
@@ -56,7 +57,7 @@ func (r *Repository) Create(championship *models.Championship) error {
 func (r *Repository) Update(id int, championship *models.Championship) error {
 	if err := r.DB.First(&models.Championship{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("campeonato com ID %s não encontrado", id)
+			return fmt.Errorf("campeonato com ID %d não encontrado", id)
 		}
 		return fmt.Errorf("erro ao verificar campeonato: %w", err)
 	}

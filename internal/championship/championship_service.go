@@ -28,7 +28,7 @@ func (s *Service) FindAll() ([]models.Championship, error) {
 	return championship, nil
 }
 
-func (s *Service) FindById(championshipId *models.Championship) (Response, error) {
+func (s *Service) FindById(championshipId int) (Response, error) {
 	championship, err := s.repo.FindById(championshipId)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro no serviço de buscar usuário: %w", err)
@@ -42,7 +42,7 @@ func (s *Service) FindById(championshipId *models.Championship) (Response, error
 	return champResponse, nil
 }
 
-func (s *Service) Create(championship *models.Championship) (Response, error) {
+func (s *Service) Create(championship CreateRequest) (Response, error) {
 	if err := s.validate.Struct(championship); err != nil {
 		return Response{}, fmt.Errorf("dados inválidos: %w", err)
 	}
