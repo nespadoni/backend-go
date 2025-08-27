@@ -3,6 +3,7 @@ package championship
 import (
 	"backend-go/internal/models"
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jinzhu/copier"
@@ -84,6 +85,18 @@ func (s Service) Delete(id int) error {
 
 	if err := s.repo.Delete(id); err != nil {
 		return fmt.Errorf("erro no serviço de deletar campeonato com ID %s: %w", id, err)
+	}
+
+	return nil
+}
+
+func (s *Service) validateDates(startDate, endDate time.Time) error {
+	if endDate.Before(startDate) {
+		return fmt.Errorf("data de término deve ser posterior à data de início")
+	}
+
+	if startDate.Before(time.Now().Truncate(24 * time.Hour)) {
+		return fmt.Errorf("data de início não pode ser no passado")
 	}
 
 	return nil
