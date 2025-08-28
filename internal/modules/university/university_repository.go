@@ -3,6 +3,7 @@ package university
 import (
 	"backend-go/internal/models"
 	"backend-go/internal/repository"
+	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -41,4 +42,20 @@ func (r *Repository) Create(university *models.University) error {
 	}
 
 	return r.DB.First(university, university.ID).Error
+}
+
+func (r *Repository) Update(id int, university *models.University) error {
+	var existingUniversity models.University
+	if err := r.DB.First(&existingUniversity, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("universidade com ID %d não encontrado", id)
+		}
+		return fmt.Errorf("erro ao verificar universidade: %w", err)
+	}
+
+	if err := r.DB.Model(&models.University{}).Where("id = ?", id).Updates(university).Error; err != nil {
+		return fmt.Errorf("erro ao atualizar universidade: %w", err)
+	}
+
+	return nil
 }
