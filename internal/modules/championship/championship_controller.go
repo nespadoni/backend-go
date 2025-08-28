@@ -22,13 +22,16 @@ func NewChampionshipController(service *Service) *Controller {
 
 func (c *Controller) FindAll(ctx *gin.Context) {
 
-	championship, err := c.service.FindAll()
+	championships, err := c.service.FindAll()
 	if err != nil {
-
-		ctx.JSON(http.StatusBadRequest, championship)
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
+			Error:   "fetch_failed",
+			Message: err.Error(),
+		})
+		return
 	}
 
-	ctx.JSON(http.StatusOK, championship)
+	ctx.JSON(http.StatusOK, championships)
 }
 
 func (c *Controller) FindById(ctx *gin.Context) {

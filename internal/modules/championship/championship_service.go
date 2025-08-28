@@ -18,14 +18,19 @@ func NewChampionshipService(repo *Repository) *Service {
 	return &Service{repo: *repo}
 }
 
-func (s *Service) FindAll() ([]models.Championship, error) {
+func (s *Service) FindAll() ([]ListResponse, error) {
 
-	championship, err := s.repo.FindAll()
+	championships, err := s.repo.FindAll()
 	if err != nil {
 		return nil, err
 	}
 
-	return championship, nil
+	var listResponses []ListResponse
+	if err := copier.Copy(&listResponses, &championships); err != nil {
+		return nil, fmt.Errorf("erro ao converter dados: %w", err)
+	}
+
+	return listResponses, nil
 }
 
 func (s *Service) FindById(championshipId int) (Response, error) {
