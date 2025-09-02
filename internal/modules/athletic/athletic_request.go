@@ -6,8 +6,8 @@ type CreateRequest struct {
 	Logo         string `validate:"omitempty,url,max=255" json:"logo,omitempty"`
 	CoverImage   string `validate:"omitempty,url,max=255" json:"cover_image,omitempty"`
 	IsPublic     bool   `json:"is_public,omitempty"`
-	UniversityId int    `validate:"required,min=1" json:"university_id"`
-	CreatorId    int    `validate:"required,min=1" json:"creator_id"`
+	UniversityId uint   `validate:"required,min=1" json:"university_id"`
+	CreatorId    uint   `validate:"required,min=1" json:"creator_id"`
 }
 
 type UpdateRequest struct {

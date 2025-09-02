@@ -6,7 +6,7 @@ import (
 )
 
 type Response struct {
-	Id             int               `json:"id"`
+	Id             uint              `json:"id"`
 	Name           string            `json:"name"`
 	Description    string            `json:"description"`
 	Logo           string            `json:"logo,omitempty"`
@@ -21,7 +21,7 @@ type Response struct {
 }
 
 type ListResponse struct {
-	Id             int               `json:"id"`
+	Id             uint              `json:"id"`
 	Name           string            `json:"name"`
 	Description    string            `json:"description"`
 	Logo           string            `json:"logo,omitempty"`

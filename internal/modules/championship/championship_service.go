@@ -4,7 +4,6 @@ import (
 	"backend-go/internal/models"
 	"backend-go/pkg/utils"
 	"fmt"
-	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jinzhu/copier"
@@ -40,7 +39,7 @@ func (s *Service) FindAll() ([]ListResponse, error) {
 func (s *Service) FindById(championshipId uint) (Response, error) {
 	championship, err := s.repo.FindById(championshipId)
 	if err != nil {
-		return Response{}, fmt.Errorf("erro no serviço de buscar usuário: %w", err)
+		return Response{}, fmt.Errorf("erro no serviço de buscar campeonato: %w", err)
 	}
 
 	var champResponse Response
@@ -56,7 +55,7 @@ func (s *Service) Create(championship CreateRequest) (Response, error) {
 		return Response{}, fmt.Errorf("dados inválidos: %w", err)
 	}
 
-	if err := s.validateDates(championship.StartDate, championship.EndDate); err != nil {
+	if err := utils.ValidateEventDates(championship.StartDate, championship.EndDate); err != nil {
 		return Response{}, fmt.Errorf("datas inválidas: %w", err)
 	}
 
@@ -115,18 +114,6 @@ func (s *Service) Delete(id uint) error {
 
 	if err := s.repo.Delete(id); err != nil {
 		return fmt.Errorf("erro no serviço de deletar campeonato com ID %d: %w", id, err)
-	}
-
-	return nil
-}
-
-func (s *Service) validateDates(startDate, endDate time.Time) error {
-	if endDate.Before(startDate) {
-		return fmt.Errorf("data de término deve ser posterior à data de início")
-	}
-
-	if startDate.Before(time.Now().Truncate(24 * time.Hour)) {
-		return fmt.Errorf("data de início não pode ser no passado")
 	}
 
 	return nil

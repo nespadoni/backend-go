@@ -27,7 +27,7 @@ func (r *Repository) FindAll() ([]models.Athletic, error) {
 	return athletic, nil
 }
 
-func (r *Repository) FindById(athleticId int) (models.Athletic, error) {
+func (r *Repository) FindById(athleticId uint) (models.Athletic, error) {
 	var athletic models.Athletic
 
 	if err := r.DB.Preload("University").First(&athletic, athleticId).Error; err != nil {
@@ -47,7 +47,7 @@ func (r *Repository) Create(athletic *models.Athletic) error {
 	return r.DB.Preload("University").First(athletic, athletic.ID).Error
 }
 
-func (r *Repository) Update(id int, athletic models.Athletic) error {
+func (r *Repository) Update(id uint, athletic models.Athletic) error {
 	if err := r.DB.First(&models.Athletic{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return fmt.Errorf("atlética com ID %d não encontrada", id)
@@ -62,7 +62,7 @@ func (r *Repository) Update(id int, athletic models.Athletic) error {
 	return nil
 }
 
-func (r *Repository) Delete(id int) error {
+func (r *Repository) Delete(id uint) error {
 	result := r.DB.Delete(&models.Athletic{}, id)
 	if result.Error != nil {
 		return fmt.Errorf("erro ao deletar atlética: %w", result.Error)

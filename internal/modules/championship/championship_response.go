@@ -6,7 +6,7 @@ import (
 )
 
 type Response struct {
-	Id        int             `json:"id"`
+	Id        uint            `json:"id"`
 	Name      string          `json:"name"`
 	StartDate time.Time       `json:"start_date"`
 	EndDate   time.Time       `json:"end_date"`
@@ -17,7 +17,7 @@ type Response struct {
 }
 
 type ListResponse struct {
-	Id        int             `json:"id"`
+	Id        uint            `json:"id"`
 	Name      string          `json:"name"`
 	StartDate time.Time       `json:"start_date"`
 	EndDate   time.Time       `json:"end_date"`
@@ -26,11 +26,11 @@ type ListResponse struct {
 }
 
 type AthleticSummary struct {
-	Id         int    `json:"id"`
+	Id         uint   `json:"id"`
 	Name       string `json:"name"`
 	Logo       string `json:"logo,omitempty"`
 	University struct {
-		Id   int    `json:"id"`
+		Id   uint   `json:"id"`
 		Name string `json:"name"`
 	} `json:"university"`
 }

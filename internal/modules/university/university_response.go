@@ -3,7 +3,7 @@ package university
 import "time"
 
 type Response struct {
-	Id        int       `json:"id"`
+	Id        uint      `json:"id"`
 	Name      string    `json:"name"`
 	Acronym   string    `json:"acronym,omitempty"`
 	City      string    `json:"city,omitempty"`
@@ -15,7 +15,7 @@ type Response struct {
 }
 
 type ListResponse struct {
-	Id      int    `json:"id"`
+	Id      uint   `json:"id"`
 	Name    string `json:"name"`
 	Acronym string `json:"acronym,omitempty"`
 	City    string `json:"city,omitempty"`

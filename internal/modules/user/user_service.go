@@ -34,7 +34,7 @@ func (s *Service) GetAll() ([]Response, error) {
 	return userResponses, nil
 }
 
-func (s *Service) GetById(userID int) (Response, error) {
+func (s *Service) GetById(userID uint) (Response, error) {
 	user, err := s.repo.GetById(userID)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro no serviço ao buscar usuário: %w", err)
@@ -78,7 +78,7 @@ func (s *Service) CreateUser(req CreateUserRequest) (Response, error) {
 	return userResponse, nil
 }
 
-func (s *Service) UpdateUser(id int, req UpdateUserRequest) (Response, error) {
+func (s *Service) UpdateUser(id uint, req UpdateUserRequest) (Response, error) {
 	// Validar request
 	if err := s.validate.Struct(&req); err != nil {
 		return Response{}, fmt.Errorf("dados inválidos: %w", err)
@@ -101,7 +101,7 @@ func (s *Service) UpdateUser(id int, req UpdateUserRequest) (Response, error) {
 	return userResponse, nil
 }
 
-func (s *Service) DeleteUser(id int) error {
+func (s *Service) DeleteUser(id uint) error {
 	if err := s.repo.Delete(id); err != nil {
 		return fmt.Errorf("erro no serviço ao deletar usuário com ID %d: %w", id, err)
 	}
