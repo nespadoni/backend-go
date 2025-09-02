@@ -109,3 +109,64 @@ func (c *Controller) Update(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, championship)
 }
+
+func (c *Controller) UpdateStatus(ctx *gin.Context) {
+	championshipIDStr := ctx.Param("id")
+	championshipID, err := strconv.ParseUint(championshipIDStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Error:   "invalid_championship_id",
+			Message: "ID do campeonato deve ser um número válido",
+		})
+		return
+	}
+
+	var request UpdateStatusRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Error:   "invalid_request_body",
+			Message: "Dados de atualização de status inválidos",
+		})
+		return
+	}
+
+	championship, err := c.championshipService.UpdateStatus(uint(championshipID), request)
+	if err != nil {
+		if err.Error() == "campeonato não encontrado" {
+			ctx.JSON(http.StatusNotFound, utils.ErrorResponse{
+				Error:   "championship_not_found",
+				Message: "Campeonato não encontrado",
+			})
+			return
+		}
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Error:   "update_status_failed",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, championship)
+}
+
+func (c *Controller) Delete(ctx *gin.Context) {
+	championshipIDStr := ctx.Param("id")
+	championshipID, err := strconv.ParseUint(championshipIDStr, 10, 32)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Error:   "invalid_championship_id",
+			Message: "ID do campeonato deve ser um número válido",
+		})
+		return
+	}
+
+	if err := c.championshipService.Delete(uint(championshipID)); err != nil {
+		ctx.JSON(http.StatusNotFound, utils.ErrorResponse{
+			Error:   "championship_not_found",
+			Message: "Campeonato não encontrado ou erro ao deletar",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+}
