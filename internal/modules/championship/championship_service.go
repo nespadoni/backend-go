@@ -2,6 +2,7 @@ package championship
 
 import (
 	"backend-go/internal/models"
+	"backend-go/pkg/utils"
 	"fmt"
 	"time"
 
@@ -10,23 +11,22 @@ import (
 )
 
 type Service struct {
-	repo     Repository
+	repo     *Repository
 	validate *validator.Validate
 }
 
 func NewChampionshipService(repo *Repository, validate *validator.Validate) *Service {
 	return &Service{
-		repo:     *repo,
+		repo:     repo,
 		validate: validate,
 	}
 
 }
 
 func (s *Service) FindAll() ([]ListResponse, error) {
-
 	championships, err := s.repo.FindAll()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("erro ao chamar metodo find all no repositório: %w", err)
 	}
 
 	var listResponses []ListResponse
@@ -37,7 +37,7 @@ func (s *Service) FindAll() ([]ListResponse, error) {
 	return listResponses, nil
 }
 
-func (s *Service) FindById(championshipId int) (Response, error) {
+func (s *Service) FindById(championshipId uint) (Response, error) {
 	championship, err := s.repo.FindById(championshipId)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro no serviço de buscar usuário: %w", err)
@@ -45,7 +45,7 @@ func (s *Service) FindById(championshipId int) (Response, error) {
 
 	var champResponse Response
 	if err := copier.Copy(&champResponse, championship); err != nil {
-		return Response{}, fmt.Errorf("erro ao buscar converter dados: %w", err)
+		return Response{}, fmt.Errorf("erro ao converter dados: %w", err)
 	}
 
 	return champResponse, nil
@@ -69,7 +69,7 @@ func (s *Service) Create(championship CreateRequest) (Response, error) {
 		return Response{}, fmt.Errorf("erro ao criar campeonato: %w", err)
 	}
 
-	createdChampionship, err := s.repo.FindById(int(newChampionship.ID))
+	createdChampionship, err := s.repo.FindById(newChampionship.ID)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro ao buscar campeonato criado: %w", err)
 	}
@@ -82,13 +82,13 @@ func (s *Service) Create(championship CreateRequest) (Response, error) {
 	return championshipResponse, nil
 }
 
-func (s *Service) Update(id int, req UpdateRequest) (Response, error) {
+func (s *Service) Update(id uint, req UpdateRequest) (Response, error) {
 	if err := s.validate.Struct(&req); err != nil {
 		return Response{}, fmt.Errorf("dados invalidos: %w", err)
 	}
 
 	// Validar datas
-	if err := s.validateDates(req.StartDate, req.EndDate); err != nil {
+	if err := utils.ValidateEventDates(req.StartDate, req.EndDate); err != nil {
 		return Response{}, fmt.Errorf("datas inválidas: %w", err)
 	}
 
@@ -100,7 +100,7 @@ func (s *Service) Update(id int, req UpdateRequest) (Response, error) {
 
 	updatedChampionship, err := s.repo.Update(id, &championship)
 	if err != nil {
-		return Response{}, fmt.Errorf("erro ao atualiar campeonato: %w", err)
+		return Response{}, fmt.Errorf("erro ao atualizar campeonato: %w", err)
 	}
 
 	var championshipResponse Response
@@ -111,7 +111,7 @@ func (s *Service) Update(id int, req UpdateRequest) (Response, error) {
 	return championshipResponse, nil
 }
 
-func (s *Service) Delete(id int) error {
+func (s *Service) Delete(id uint) error {
 
 	if err := s.repo.Delete(id); err != nil {
 		return fmt.Errorf("erro no serviço de deletar campeonato com ID %d: %w", id, err)

@@ -29,7 +29,7 @@ func (r *Repository) FindAll() ([]models.Championship, error) {
 	return championships, nil
 }
 
-func (r *Repository) FindById(id int) (models.Championship, error) {
+func (r *Repository) FindById(id uint) (models.Championship, error) {
 	var championship models.Championship
 
 	if err := r.DB.Preload("Athletic").First(&championship, id).Error; err != nil {
@@ -54,7 +54,7 @@ func (r *Repository) Create(championship *models.Championship) error {
 	})
 }
 
-func (r *Repository) Update(id int, championship *models.Championship) (*models.Championship, error) {
+func (r *Repository) Update(id uint, championship *models.Championship) (*models.Championship, error) {
 	// Verificar se existe no DB
 	if err := r.DB.First(&models.Championship{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -79,7 +79,7 @@ func (r *Repository) Update(id int, championship *models.Championship) (*models.
 
 }
 
-func (r *Repository) Delete(id int) error {
+func (r *Repository) Delete(id uint) error {
 	result := r.DB.Delete(&models.Championship{}, id)
 
 	if result.Error != nil {
