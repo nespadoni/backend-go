@@ -14,8 +14,12 @@ type Service struct {
 	validate *validator.Validate
 }
 
-func NewChampionshipService(repo *Repository) *Service {
-	return &Service{repo: *repo}
+func NewChampionshipService(repo *Repository, validate *validator.Validate) *Service {
+	return &Service{
+		repo:     *repo,
+		validate: validate,
+	}
+
 }
 
 func (s *Service) FindAll() ([]ListResponse, error) {
@@ -52,17 +56,26 @@ func (s *Service) Create(championship CreateRequest) (Response, error) {
 		return Response{}, fmt.Errorf("dados inválidos: %w", err)
 	}
 
+	if err := s.validateDates(championship.StartDate, championship.EndDate); err != nil {
+		return Response{}, fmt.Errorf("datas inválidas: %w", err)
+	}
+
 	var newChampionship models.Championship
 	if err := copier.Copy(&newChampionship, &championship); err != nil {
 		return Response{}, fmt.Errorf("erro ao processar dados: %w", err)
 	}
 
 	if err := s.repo.Create(&newChampionship); err != nil {
-		return Response{}, fmt.Errorf("erro ao criar usuario: %w", err)
+		return Response{}, fmt.Errorf("erro ao criar campeonato: %w", err)
+	}
+
+	createdChampionship, err := s.repo.FindById(int(newChampionship.ID))
+	if err != nil {
+		return Response{}, fmt.Errorf("erro ao buscar campeonato criado: %w", err)
 	}
 
 	var championshipResponse Response
-	if err := copier.Copy(&championshipResponse, &newChampionship); err != nil {
+	if err := copier.Copy(&championshipResponse, &createdChampionship); err != nil {
 		return Response{}, fmt.Errorf("erro ao converter resposta: %w", err)
 	}
 

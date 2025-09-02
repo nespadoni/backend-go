@@ -146,7 +146,14 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 
 	user, err := c.userService.UpdateUser(userId, updateRequest)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse{
+		if err.Error() == "usuário não encontrado" {
+			ctx.JSON(http.StatusNotFound, ErrorResponse{
+				Error:   "user_not_found",
+				Message: "Usuário não encontrado",
+			})
+			return
+		}
+		ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "update_failed",
 			Message: err.Error(),
 		})
@@ -187,5 +194,5 @@ func (c *Controller) DeleteUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.Status(http.StatusNoContent)
 }

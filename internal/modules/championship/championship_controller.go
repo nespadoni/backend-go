@@ -81,12 +81,12 @@ func (c *Controller) Create(ctx *gin.Context) {
 }
 
 func (c *Controller) Update(ctx *gin.Context) {
-	championshipIdStr := ctx.Param("Id")
+	championshipIdStr := ctx.Param("id")
 	championshipId, err := strconv.Atoi(championshipIdStr)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "internal_server_error",
-			Message: "Erro interno do servidor",
+			Error:   "invalid_id",
+			Message: "ID inválido",
 		})
 		return
 	}
@@ -106,27 +106,30 @@ func (c *Controller) Update(ctx *gin.Context) {
 			Error:   "update_failed",
 			Message: err.Error(),
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, championship)
 }
 
 func (c *Controller) Delete(ctx *gin.Context) {
-	championshipIdStr := ctx.Param("Id")
+	championshipIdStr := ctx.Param("id")
 	championshipId, err := strconv.Atoi(championshipIdStr)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:   "internal_server_error",
-			Message: "Erro interno do servidor",
+			Error:   "invalid_id",
+			Message: "ID inválido",
 		})
+		return
 	}
 
 	if err := c.service.Delete(championshipId); err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "championship_not_found",
-			Message: "Campeonato não encontrado",
+			Message: err.Error(),
 		})
+		return
 	}
 
-	ctx.Status(http.StatusOK)
+	ctx.Status(http.StatusNoContent)
 }

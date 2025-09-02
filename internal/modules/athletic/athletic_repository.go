@@ -5,7 +5,6 @@ import (
 	"backend-go/internal/repository"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -48,39 +47,29 @@ func (r *Repository) Create(athletic *models.Athletic) error {
 	return r.DB.Preload("University").First(athletic, athletic.ID).Error
 }
 
-func (r *Repository) Update(id string, athletic models.Athletic) error {
-	athleticID, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("ID inválido: %w", err)
-	}
-
-	if err := r.DB.First(&models.Athletic{}, athleticID).Error; err != nil {
+func (r *Repository) Update(id int, athletic models.Athletic) error {
+	if err := r.DB.First(&models.Athletic{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("atletica com ID %s não encontrado", id)
+			return fmt.Errorf("atlética com ID %d não encontrada", id)
 		}
-		return fmt.Errorf("erro ao verificar atletica: %w", err)
+		return fmt.Errorf("erro ao verificar atlética: %w", err)
 	}
 
-	if err := r.DB.Model(&models.Athletic{}).Where("id = ?").Updates(athletic).Error; err != nil {
+	if err := r.DB.Model(&models.Athletic{}).Where("id = ?", id).Updates(athletic).Error; err != nil {
 		return fmt.Errorf("erro ao atualizar os dados da atlética: %w", err)
 	}
 
-	return r.DB.Preload("University").First(athletic, athleticID).Error
+	return nil
 }
 
-func (r *Repository) Delete(id string) error {
-	athleticId, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("ID inválido: %w", err)
-	}
-
-	result := r.DB.Delete(&models.Athletic{}, athleticId)
+func (r *Repository) Delete(id int) error {
+	result := r.DB.Delete(&models.Athletic{}, id)
 	if result.Error != nil {
-		return fmt.Errorf("erro ao deletar usuário: %w", result.Error)
+		return fmt.Errorf("erro ao deletar atlética: %w", result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("usuario com ID %d não encontrado", athleticId)
+		return fmt.Errorf("atlética com ID %d não encontrada", id)
 	}
 
 	return nil
