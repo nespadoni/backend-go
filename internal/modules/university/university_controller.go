@@ -52,8 +52,6 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 }
 
-// ... existing code ...
-
 func (c *Controller) Create(ctx *gin.Context) {
 	var newUniversity CreateRequest
 	if err := ctx.ShouldBindJSON(&newUniversity); err != nil {
