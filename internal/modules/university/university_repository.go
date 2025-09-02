@@ -18,20 +18,23 @@ func NewUniversityRepository(db *gorm.DB) *Repository {
 }
 
 func (r *Repository) FindAll() ([]models.University, error) {
-	var university []models.University
+	var universities []models.University
 
-	if err := r.DB.Find(&university).Error; err != nil {
+	if err := r.DB.Find(&universities).Error; err != nil {
 		return nil, fmt.Errorf("erro ao buscar universidades: %w", err)
 	}
 
-	return university, nil
+	return universities, nil
 }
 
-func (r *Repository) FindById(id int) (models.University, error) {
+func (r *Repository) FindById(id uint) (models.University, error) {
 	var university models.University
 
 	if err := r.DB.First(&university, id).Error; err != nil {
-		return models.University{}, fmt.Errorf("universidade com ID %d não encontrado", id)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return models.University{}, fmt.Errorf("universidade com ID %d não encontrada", id)
+		}
+		return models.University{}, fmt.Errorf("erro ao buscar universidade: %w", err)
 	}
 	return university, nil
 }
@@ -44,17 +47,38 @@ func (r *Repository) Create(university *models.University) error {
 	return r.DB.First(university, university.ID).Error
 }
 
-func (r *Repository) Update(id int, university *models.University) error {
-	var existingUniversity models.University
-	if err := r.DB.First(&existingUniversity, id).Error; err != nil {
+func (r *Repository) Update(id uint, university *models.University) (*models.University, error) {
+	// Verificar se existe
+	if err := r.DB.First(&models.University{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("universidade com ID %d não encontrado", id)
+			return nil, fmt.Errorf("universidade com ID %d não encontrada", id)
 		}
-		return fmt.Errorf("erro ao verificar universidade: %w", err)
+		return nil, fmt.Errorf("erro ao verificar universidade: %w", err)
 	}
 
+	// Atualizar
 	if err := r.DB.Model(&models.University{}).Where("id = ?", id).Updates(university).Error; err != nil {
-		return fmt.Errorf("erro ao atualizar universidade: %w", err)
+		return nil, fmt.Errorf("erro ao atualizar universidade: %w", err)
+	}
+
+	// Buscar registro atualizado
+	var updatedUniversity models.University
+	if err := r.DB.First(&updatedUniversity, id).Error; err != nil {
+		return nil, fmt.Errorf("erro ao buscar universidade atualizada: %w", err)
+	}
+
+	return &updatedUniversity, nil
+}
+
+func (r *Repository) Delete(id uint) error {
+	result := r.DB.Delete(&models.University{}, id)
+
+	if result.Error != nil {
+		return fmt.Errorf("erro ao deletar universidade: %w", result.Error)
+	}
+
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("universidade com ID %d não encontrada", id)
 	}
 
 	return nil

@@ -37,7 +37,7 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 func (c *Controller) FindById(ctx *gin.Context) {
 	championshipIdStr := ctx.Param("id")
 
-	championshipId, err := strconv.Atoi(championshipIdStr)
+	championshipId, err := strconv.ParseUint(championshipIdStr, 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "internal_server_error",
@@ -46,7 +46,7 @@ func (c *Controller) FindById(ctx *gin.Context) {
 		return
 	}
 
-	response, err := c.service.FindById(championshipId)
+	response, err := c.service.FindById(uint(championshipId))
 	if err != nil {
 		ctx.JSON(http.StatusNotFound, ErrorResponse{
 			Error:   "user_not_found",
@@ -82,7 +82,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 
 func (c *Controller) Update(ctx *gin.Context) {
 	championshipIdStr := ctx.Param("id")
-	championshipId, err := strconv.Atoi(championshipIdStr)
+	championshipId, err := strconv.ParseUint(championshipIdStr, 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "invalid_id",
@@ -100,7 +100,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 		return
 	}
 
-	championship, err := c.service.Update(championshipId, updateRequest)
+	championship, err := c.service.Update(uint(championshipId), updateRequest)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "update_failed",
@@ -114,7 +114,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 
 func (c *Controller) Delete(ctx *gin.Context) {
 	championshipIdStr := ctx.Param("id")
-	championshipId, err := strconv.Atoi(championshipIdStr)
+	championshipId, err := strconv.ParseUint(championshipIdStr, 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "invalid_id",
@@ -123,7 +123,7 @@ func (c *Controller) Delete(ctx *gin.Context) {
 		return
 	}
 
-	if err := c.service.Delete(championshipId); err != nil {
+	if err := c.service.Delete(uint(championshipId)); err != nil {
 		ctx.JSON(http.StatusBadRequest, ErrorResponse{
 			Error:   "championship_not_found",
 			Message: err.Error(),
