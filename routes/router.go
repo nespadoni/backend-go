@@ -4,7 +4,9 @@ import (
 	"backend-go/config"
 	"backend-go/docs"
 	"backend-go/internal/auth"
+	"backend-go/internal/modules/athletic"
 	championship2 "backend-go/internal/modules/championship"
+	"backend-go/internal/modules/university"
 	user2 "backend-go/internal/modules/user"
 	"backend-go/pkg/middleware"
 	"log"
@@ -37,6 +39,9 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	// Controladores
 	championController := startChampionship(database)
 	userController := startUser(database)
+	athleticController := startAthletic(database)
+	universityController := startUniversity(database)
+
 	permissionService := auth.NewPermissionService(database)
 	authMiddleware := auth.NewMiddleware(permissionService)
 
@@ -47,23 +52,46 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	// Rotas da API
 	api := r.Group("/api")
 	{
+		// Rotas de Universidades
+		universityRoutes := api.Group("/universities")
+		{
+			universityRoutes.GET("/", universityController.FindAll)
+			universityRoutes.GET("/:id", universityController.FindById)
+			universityRoutes.POST("/", universityController.Create)
+			universityRoutes.PUT("/:id", universityController.Update)
+			universityRoutes.DELETE("/:id", universityController.Delete)
+		}
 
-		championshipRoutes := api.Group("/championship")
+		// Rotas de Usuários
+		userRoutes := api.Group("/users")
+		{
+			userRoutes.GET("/", userController.FindAll)
+			userRoutes.GET("/:id", userController.FindById, authMiddleware.RequireLevel(80))
+			userRoutes.POST("/", userController.PostUser)
+			userRoutes.PUT("/:id", userController.UpdateUser)
+			userRoutes.DELETE("/:id", userController.DeleteUser)
+		}
+
+		// Rotas de Atléticas
+		athleticRoutes := api.Group("/athletics")
+		{
+			athleticRoutes.GET("/", athleticController.FindAll)
+			athleticRoutes.GET("/:id", athleticController.FindById)
+			athleticRoutes.POST("/", athleticController.Create)
+			athleticRoutes.PUT("/:id", athleticController.Update)
+			athleticRoutes.PATCH("/:id/status", athleticController.UpdateStatus)
+			athleticRoutes.DELETE("/:id", athleticController.Delete)
+		}
+
+		// Rotas de Campeonatos
+		championshipRoutes := api.Group("/championships")
 		{
 			championshipRoutes.GET("/", championController.FindAll)
 			championshipRoutes.GET("/:id", championController.FindById)
 			championshipRoutes.POST("/", championController.Create)
 			championshipRoutes.PUT("/:id", championController.Update)
+			championshipRoutes.PATCH("/:id/status", championController.UpdateStatus)
 			championshipRoutes.DELETE("/:id", championController.Delete)
-		}
-
-		userRoutes := api.Group("/user")
-		{
-			userRoutes.GET("/:id", userController.FindById, authMiddleware.RequireLevel(80))
-			userRoutes.GET("/", userController.FindAll)
-			userRoutes.DELETE("/:id", userController.DeleteUser)
-			userRoutes.POST("/", userController.PostUser)
-			userRoutes.PUT("/:id", userController.UpdateUser)
 		}
 	}
 
@@ -88,8 +116,9 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 }
 
 func startChampionship(database *gorm.DB) championship2.Controller {
+	validate := validator.New()
 	championRepo := championship2.NewChampionshipRepository(database)
-	championService := championship2.NewChampionshipService(championRepo)
+	championService := championship2.NewChampionshipService(championRepo, validate)
 	championController := championship2.NewChampionshipController(championService)
 
 	return *championController
@@ -102,4 +131,22 @@ func startUser(database *gorm.DB) user2.Controller {
 	userController := user2.NewUserController(userService)
 
 	return *userController
+}
+
+func startAthletic(database *gorm.DB) athletic.Controller {
+	validate := validator.New()
+	athleticRepo := athletic.NewAthleticRepository(database)
+	athleticService := athletic.NewAthleticService(athleticRepo, validate)
+	athleticController := athletic.NewAthleticController(athleticService)
+
+	return *athleticController
+}
+
+func startUniversity(database *gorm.DB) university.Controller {
+	validate := validator.New()
+	universityRepo := university.NewUniversityRepository(database)
+	universityService := university.NewUniversityService(universityRepo, validate)
+	universityController := university.NewUniversityController(universityService)
+
+	return *universityController
 }
