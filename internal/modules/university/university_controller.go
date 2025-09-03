@@ -16,6 +16,15 @@ func NewUniversityController(university *Service) *Controller {
 	return &Controller{universityService: university}
 }
 
+// FindAll godoc
+// @Summary Lista todas as universidades
+// @Description Retorna uma lista de todas as universidades cadastradas
+// @Tags universities
+// @Accept json
+// @Produce json
+// @Success 200 {array} ListResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /api/universities [get]
 func (c *Controller) FindAll(ctx *gin.Context) {
 	universities, err := c.universityService.FindAll()
 	if err != nil {
@@ -29,6 +38,17 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, universities)
 }
 
+// FindById godoc
+// @Summary Busca universidade por ID
+// @Description Retorna uma universidade específica pelo seu ID
+// @Tags universities
+// @Accept json
+// @Produce json
+// @Param id path string true "University ID"
+// @Success 200 {object} Response
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Router /api/universities/{id} [get]
 func (c *Controller) FindById(ctx *gin.Context) {
 	universityIDStr := ctx.Param("id")
 	universityID, err := strconv.ParseUint(universityIDStr, 10, 32)
@@ -52,6 +72,16 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 }
 
+// Create godoc
+// @Summary Cria uma nova universidade
+// @Description Cria uma nova universidade com os dados fornecidos
+// @Tags universities
+// @Accept json
+// @Produce json
+// @Param university body CreateRequest true "University data"
+// @Success 201 {object} Response
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /api/universities [post]
 func (c *Controller) Create(ctx *gin.Context) {
 	var newUniversity CreateRequest
 	if err := ctx.ShouldBindJSON(&newUniversity); err != nil {
@@ -74,6 +104,18 @@ func (c *Controller) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, response)
 }
 
+// Update godoc
+// @Summary Atualiza uma universidade
+// @Description Atualiza os dados de uma universidade existente
+// @Tags universities
+// @Accept json
+// @Produce json
+// @Param id path string true "University ID"
+// @Param university body UpdateRequest true "University data"
+// @Success 200 {object} Response
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Router /api/universities/{id} [put]
 func (c *Controller) Update(ctx *gin.Context) {
 	universityIDStr := ctx.Param("id")
 	universityID, err := strconv.ParseUint(universityIDStr, 10, 32)
@@ -113,6 +155,17 @@ func (c *Controller) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, university)
 }
 
+// Delete godoc
+// @Summary Deleta uma universidade
+// @Description Remove uma universidade do sistema
+// @Tags universities
+// @Accept json
+// @Produce json
+// @Param id path string true "University ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Router /api/universities/{id} [delete]
 func (c *Controller) Delete(ctx *gin.Context) {
 	universityIDStr := ctx.Param("id")
 	universityID, err := strconv.ParseUint(universityIDStr, 10, 32)

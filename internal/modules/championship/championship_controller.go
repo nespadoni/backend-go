@@ -16,6 +16,15 @@ func NewChampionshipController(championshipService *Service) *Controller {
 	return &Controller{championshipService: championshipService}
 }
 
+// FindAll godoc
+// @Summary Lista todos os campeonatos
+// @Description Retorna lista de campeonatos cadastrados
+// @Tags championships
+// @Accept json
+// @Produce json
+// @Success 200 {array} ListResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /api/championships [get]
 func (c *Controller) FindAll(ctx *gin.Context) {
 	championships, err := c.championshipService.FindAll()
 	if err != nil {
@@ -28,6 +37,17 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, championships)
 }
 
+// FindById godoc
+// @Summary Busca campeonato por ID
+// @Description Retorna campeonato específico pelo ID
+// @Tags championships
+// @Accept json
+// @Produce json
+// @Param id path string true "Championship ID"
+// @Success 200 {object} Response
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Router /api/championships/{id} [get]
 func (c *Controller) FindById(ctx *gin.Context) {
 	championshipIDStr := ctx.Param("id")
 	championshipID, err := strconv.ParseUint(championshipIDStr, 10, 32)
@@ -50,6 +70,16 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, response)
 }
 
+// Create godoc
+// @Summary Cria novo campeonato
+// @Description Cria campeonato com dados fornecidos
+// @Tags championships
+// @Accept json
+// @Produce json
+// @Param championship body CreateRequest true "Championship data"
+// @Success 201 {object} Response
+// @Failure 400 {object} utils.ErrorResponse
+// @Router /api/championships [post]
 func (c *Controller) Create(ctx *gin.Context) {
 	var newChampionship CreateRequest
 	if err := ctx.ShouldBindJSON(&newChampionship); err != nil {
@@ -71,6 +101,18 @@ func (c *Controller) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, response)
 }
 
+// Update godoc
+// @Summary Atualiza campeonato
+// @Description Atualiza dados do campeonato
+// @Tags championships
+// @Accept json
+// @Produce json
+// @Param id path string true "Championship ID"
+// @Param championship body UpdateRequest true "Championship data"
+// @Success 200 {object} Response
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Router /api/championships/{id} [put]
 func (c *Controller) Update(ctx *gin.Context) {
 	championshipIDStr := ctx.Param("id")
 
@@ -110,6 +152,18 @@ func (c *Controller) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, championship)
 }
 
+// UpdateStatus godoc
+// @Summary Atualiza status do campeonato
+// @Description Atualiza status ativo/inativo
+// @Tags championships
+// @Accept json
+// @Produce json
+// @Param id path string true "Championship ID"
+// @Param status body UpdateStatusRequest true "Status data"
+// @Success 200 {object} Response
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Router /api/championships/{id}/status [patch]
 func (c *Controller) UpdateStatus(ctx *gin.Context) {
 	championshipIDStr := ctx.Param("id")
 	championshipID, err := strconv.ParseUint(championshipIDStr, 10, 32)
@@ -149,6 +203,17 @@ func (c *Controller) UpdateStatus(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, championship)
 }
 
+// Delete godoc
+// @Summary Deleta campeonato
+// @Description Remove campeonato do sistema
+// @Tags championships
+// @Accept json
+// @Produce json
+// @Param id path string true "Championship ID"
+// @Success 204 "No Content"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Router /api/championships/{id} [delete]
 func (c *Controller) Delete(ctx *gin.Context) {
 	championshipIDStr := ctx.Param("id")
 	championshipID, err := strconv.ParseUint(championshipIDStr, 10, 32)
