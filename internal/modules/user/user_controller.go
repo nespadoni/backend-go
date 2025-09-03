@@ -16,17 +16,15 @@ func NewUserController(userService *Service) *Controller {
 	return &Controller{userService: userService}
 }
 
-// Remover esta definição local - usar utils.ErrorResponse
-
 // FindAll godoc
 // @Summary Lista todos os usuários
 // @Description Retorna uma lista de todos os usuários
 // @Tags users
 // @Accept json
 // @Produce json
-// @Success 200 {array} UserResponse
+// @Success 200 {array} Response
 // @Failure 500 {object} utils.ErrorResponse
-// @Router /api/user [get]
+// @Router /api/users [get]
 func (c *Controller) FindAll(ctx *gin.Context) {
 	users, err := c.userService.GetAll()
 	if err != nil {
@@ -47,10 +45,10 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Success 200 {object} UserResponse
+// @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
-// @Router /api/user/{id} [get]
+// @Router /api/users/{id} [get]
 func (c *Controller) FindById(ctx *gin.Context) {
 	userIDStr := ctx.Param("id")
 
@@ -82,9 +80,9 @@ func (c *Controller) FindById(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param user body CreateUserRequest true "User data"
-// @Success 201 {object} UserResponse
+// @Success 201 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
-// @Router /api/user [post]
+// @Router /api/users [post]
 func (c *Controller) PostUser(ctx *gin.Context) {
 	var newUser CreateUserRequest
 	if err := ctx.ShouldBindJSON(&newUser); err != nil {
@@ -115,10 +113,10 @@ func (c *Controller) PostUser(ctx *gin.Context) {
 // @Produce json
 // @Param id path string true "User ID"
 // @Param user body UpdateUserRequest true "User data"
-// @Success 200 {object} UserResponse
+// @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
-// @Router /api/user/{id} [put]
+// @Router /api/users/{id} [put]
 func (c *Controller) UpdateUser(ctx *gin.Context) {
 	idUserStr := ctx.Param("id")
 
@@ -169,7 +167,7 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 // @Success 204 "No Content"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
-// @Router /api/user/{id} [delete]
+// @Router /api/users/{id} [delete]
 func (c *Controller) DeleteUser(ctx *gin.Context) {
 	userIdStr := ctx.Param("id")
 

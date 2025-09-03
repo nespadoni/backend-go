@@ -110,6 +110,29 @@ func (s *Service) Update(id uint, req UpdateRequest) (Response, error) {
 	return championshipResponse, nil
 }
 
+func (s *Service) UpdateStatus(id uint, req UpdateStatusRequest) (Response, error) {
+	if err := s.validate.Struct(&req); err != nil {
+		return Response{}, fmt.Errorf("dados inválidos: %w", err)
+	}
+
+	var championship models.Championship
+	if err := copier.Copy(&championship, &req); err != nil {
+		return Response{}, fmt.Errorf("erro ao processar dados: %w", err)
+	}
+
+	updatedChampionship, err := s.repo.Update(id, &championship)
+	if err != nil {
+		return Response{}, fmt.Errorf("erro ao atualizar status do campeonato: %w", err)
+	}
+
+	var championshipResponse Response
+	if err := copier.Copy(&championshipResponse, &updatedChampionship); err != nil {
+		return Response{}, fmt.Errorf("erro ao converter resposta: %w", err)
+	}
+
+	return championshipResponse, nil
+}
+
 func (s *Service) Delete(id uint) error {
 
 	if err := s.repo.Delete(id); err != nil {
