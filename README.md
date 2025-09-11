@@ -252,7 +252,7 @@ go test -v ./...
 
 ## 👥 Equipe
 
-- **Desenvolvedor Backend**: Neto Spadoni e Luis Fernando Pinto
+- **Desenvolvedor Backend**: [Seu Nome]
 - **Projeto**: Sistema de Gestão Esportiva Universitária
 
 ## 📄 Licença
