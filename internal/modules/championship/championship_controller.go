@@ -53,7 +53,7 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	championshipID, err := strconv.ParseUint(championshipIDStr, 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
-			Error:   "invalid_user_id",
+			Error:   "invalid_championship_id",
 			Message: "ID do campeonato deve ser um número válido",
 		})
 		return
@@ -119,7 +119,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 	championshipId, err := strconv.ParseUint(championshipIDStr, 10, 32)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
-			Error:   "invalid_user_id",
+			Error:   "invalid_championship_id",
 			Message: "ID do campeonato deve ser um número válido",
 		})
 		return
