@@ -12,9 +12,9 @@ type User struct {
 	Telephone string `gorm:"size:20;not null" json:"telephone"`
 
 	// Relacionamentos acadêmicos
-	UniversityID *int        `json:"university_id,omitempty"`
+	UniversityID *uint       `json:"university_id,omitempty"`
 	University   *University `gorm:"foreignKey:UniversityID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"university,omitempty"`
-	CourseID     *int        `json:"course_id,omitempty"`
+	CourseID     *uint       `json:"course_id,omitempty"`
 	Course       *Course     `gorm:"foreignKey:CourseID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"course,omitempty"`
 
 	// Informações acadêmicas
