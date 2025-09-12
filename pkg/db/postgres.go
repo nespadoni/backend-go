@@ -13,8 +13,15 @@ import (
 )
 
 func InitDB(cfg config.DatabaseConfig) *gorm.DB {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
+	var dsn string
+	// Prioriza a DATABASE_URL se ela for fornecida (ideal para o Railway)
+	if cfg.URL != "" {
+		dsn = cfg.URL
+	} else {
+		// Monta a DSN para o ambiente local se a URL não estiver presente
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+			cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
+	}
 
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
