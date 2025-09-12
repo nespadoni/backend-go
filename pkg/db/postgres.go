@@ -14,11 +14,11 @@ import (
 
 func InitDB(cfg config.DatabaseConfig) *gorm.DB {
 	var dsn string
-	// Prioriza a DATABASE_URL se ela for fornecida (ideal para o Railway)
+	// Verifica se a URL de conexão completa foi fornecida (padrão do Railway)
 	if cfg.URL != "" {
 		dsn = cfg.URL
 	} else {
-		// Monta a DSN para o ambiente local se a URL não estiver presente
+		// Se não, monta a string manualmente (para ambiente de desenvolvimento local)
 		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 			cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
 	}
@@ -29,7 +29,8 @@ func InitDB(cfg config.DatabaseConfig) *gorm.DB {
 
 	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
-		log.Fatalf("Erro ao conectar com o banco de dados: %v", err)
+		// Adicionado mais detalhes ao log de erro
+		log.Fatalf("Erro ao conectar com o banco de dados usando DSN: %v", err)
 	}
 
 	if err := autoMigrate(db); err != nil {
