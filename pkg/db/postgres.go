@@ -13,8 +13,13 @@ import (
 )
 
 func InitDB(cfg config.DatabaseConfig) *gorm.DB {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
+	var dsn string
+	if cfg.URL != "" {
+		dsn = cfg.URL
+	} else {
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+			cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
+	}
 
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
