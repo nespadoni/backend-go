@@ -31,8 +31,8 @@ func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "8080"),
 		Database: DatabaseConfig{
-			URL:  getEnv("DATABASE_URL", ""),
-			Host: getEnv("PGHOST", "localhost"),
+			URL:  getEnv("DATABASE_URL", "postgresql://postgres:qLnjqwrWVBxPJiFAeluNLlfGRTCizIGZ@postgres.railway.internal:5432/rivaly"),
+			Host: getEnv("PGHOST", "postgres.railway.internal"),
 			Port: getEnv("PGPORT", "5432"),
 			User: getEnv("PGUSER", "postgres"),
 		},
