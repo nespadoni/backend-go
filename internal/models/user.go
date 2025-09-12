@@ -11,6 +11,9 @@ type User struct {
 	Password  string `gorm:"size:100;not null" json:"password"`
 	Telephone string `gorm:"size:20;not null" json:"telephone"`
 
+	// Campo para foto de perfil
+	ProfilePhotoURL *string `gorm:"size:255" json:"profile_photo_url,omitempty"`
+
 	// Relacionamentos acadêmicos
 	UniversityID *uint       `json:"university_id,omitempty"`
 	University   *University `gorm:"foreignKey:UniversityID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"university,omitempty"`

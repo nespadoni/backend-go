@@ -2,8 +2,15 @@ package user
 
 import (
 	"backend-go/pkg/utils" // Adicionar este import
+	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +21,138 @@ type Controller struct {
 
 func NewUserController(userService *Service) *Controller {
 	return &Controller{userService: userService}
+}
+
+// UploadProfilePhoto godoc
+// @Summary Upload de foto de perfil
+// @Description Faz upload da foto de perfil do usuário
+// @Tags users
+// @Accept multipart/form-data
+// @Produce json
+// @Param profilePhoto formData file true "Foto de perfil"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Router /api/users/profile-photo [post]
+func (c *Controller) UploadProfilePhoto(ctx *gin.Context) {
+	// Extrair ID do usuário do contexto (middleware JWT)
+	userIDInterface, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, utils.ErrorResponse{
+			Error:   "unauthorized",
+			Message: "Usuário não autenticado",
+		})
+		return
+	}
+
+	userIDFloat, ok := userIDInterface.(float64)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, utils.ErrorResponse{
+			Error:   "unauthorized",
+			Message: "Formato de ID de usuário inválido no token.",
+		})
+		return
+	}
+	userID := uint(userIDFloat)
+
+	// Obter o arquivo do formulário
+	file, header, err := ctx.Request.FormFile("profilePhoto")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Error:   "file_not_found",
+			Message: "Arquivo não encontrado",
+		})
+		return
+	}
+	defer file.Close()
+
+	// Validar tipo de arquivo
+	if !isValidImageType(header) {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Error:   "invalid_file_type",
+			Message: "Tipo de arquivo inválido. Use JPG, PNG ou GIF.",
+		})
+		return
+	}
+
+	// Validar tamanho do arquivo (5MB max)
+	if header.Size > 5*1024*1024 {
+		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
+			Error:   "file_too_large",
+			Message: "Arquivo muito grande. Máximo: 5MB.",
+		})
+		return
+	}
+
+	// Salvar arquivo
+	photoURL, err := c.saveProfilePhoto(file, header, userID)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Error:   "upload_failed",
+			Message: "Erro ao fazer upload da foto.",
+		})
+		return
+	}
+
+	// Atualizar usuário no banco
+	err = c.userService.UpdateProfilePhoto(userID, photoURL)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.ErrorResponse{
+			Error:   "update_failed",
+			Message: "Erro ao atualizar foto no perfil.",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"profilePhotoUrl": photoURL,
+		"message":         "Foto de perfil atualizada com sucesso",
+	})
+}
+
+// Funções auxiliares
+func isValidImageType(header *multipart.FileHeader) bool {
+	validTypes := map[string]bool{
+		"image/jpeg": true,
+		"image/jpg":  true,
+		"image/png":  true,
+		"image/gif":  true,
+	}
+
+	contentType := header.Header.Get("Content-Type")
+	return validTypes[contentType]
+}
+
+func (c *Controller) saveProfilePhoto(file multipart.File, header *multipart.FileHeader, userID uint) (string, error) {
+	// Criar diretório se não existir
+	uploadDir := "uploads/profile_photos"
+	if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
+		return "", err
+	}
+
+	// Gerar nome único para o arquivo
+	ext := filepath.Ext(header.Filename)
+	fileName := fmt.Sprintf("user_%d_%d%s", userID, time.Now().Unix(), ext)
+	filePath := filepath.Join(uploadDir, fileName)
+
+	// Criar arquivo no servidor
+	dst, err := os.Create(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer dst.Close()
+
+	// Copiar conteúdo
+	if _, err := io.Copy(dst, file); err != nil {
+		return "", err
+	}
+
+	// Formata a URL para o padrão web
+	webPath := fmt.Sprintf("/uploads/profile_photos/%s", fileName)
+	// Garante que a URL use sempre a barra correta ('/'), independentemente do sistema operacional
+	urlPath := strings.ReplaceAll(webPath, "\\", "/")
+
+	return urlPath, nil
 }
 
 // FindAll godoc
@@ -39,12 +178,12 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 }
 
 // FindById godoc
-// @Summary Busca usuário por ID
-// @Description Retorna um usuário específico pelo seu ID
+// @Summary Busca usuário por Id
+// @Description Retorna um usuário específico pelo seu Id
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param id path string true "User ID"
+// @Param id path string true "User Id"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -56,7 +195,7 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_user_id",
-			Message: "ID do usuário deve ser um número válido",
+			Message: "Id do usuário deve ser um número válido",
 		})
 		return
 	}
@@ -111,7 +250,7 @@ func (c *Controller) PostUser(ctx *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param id path string true "User ID"
+// @Param id path string true "User Id"
 // @Param user body UpdateUserRequest true "User data"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
@@ -124,7 +263,7 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_user_id",
-			Message: "ID do usuário deve ser um número válido",
+			Message: "Id do usuário deve ser um número válido",
 		})
 		return
 	}
@@ -163,7 +302,7 @@ func (c *Controller) UpdateUser(ctx *gin.Context) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param id path string true "User ID"
+// @Param id path string true "User Id"
 // @Success 204 "No Content"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -175,7 +314,7 @@ func (c *Controller) DeleteUser(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_user_id",
-			Message: "ID do usuário deve ser um número válido",
+			Message: "Id do usuário deve ser um número válido",
 		})
 		return
 	}

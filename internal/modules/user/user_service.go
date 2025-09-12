@@ -20,6 +20,25 @@ func NewUserService(repo *Repository, validate *validator.Validate) *Service {
 	}
 }
 
+func (s *Service) UpdateProfilePhoto(userID uint, photoURL string) error {
+	// Buscar usuário
+	user, err := s.repo.GetById(userID)
+	if err != nil {
+		return fmt.Errorf("usuário não encontrado: %w", err)
+	}
+
+	// Atualizar foto
+	user.ProfilePhotoURL = &photoURL
+
+	// Salvar no banco
+	err = s.repo.Update(userID, &user)
+	if err != nil {
+		return fmt.Errorf("erro ao atualizar foto de perfil: %w", err)
+	}
+
+	return nil
+}
+
 func (s *Service) GetAll() ([]Response, error) {
 	users, err := s.repo.FindAll()
 	if err != nil {
@@ -103,7 +122,7 @@ func (s *Service) UpdateUser(id uint, req UpdateUserRequest) (Response, error) {
 
 func (s *Service) DeleteUser(id uint) error {
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço ao deletar usuário com ID %d: %w", id, err)
+		return fmt.Errorf("erro no serviço ao deletar usuário com Id %d: %w", id, err)
 	}
 
 	return nil

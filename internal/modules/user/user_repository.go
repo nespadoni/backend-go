@@ -33,7 +33,7 @@ func (r *Repository) GetById(id uint) (models.User, error) {
 	err := r.DB.Preload("University").First(&user, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.User{}, fmt.Errorf("usuário com ID %d não encontrado", id)
+			return models.User{}, fmt.Errorf("usuário com Id %d não encontrado", id)
 		}
 		return models.User{}, fmt.Errorf("erro ao buscar usuário: %w", err)
 	}
@@ -60,13 +60,13 @@ func (r *Repository) Create(user *models.User) error {
 		return fmt.Errorf("erro ao criar usuário: %w", err)
 	}
 
-	return r.DB.Preload("University").First(user, user.ID).Error
+	return r.DB.Preload("University").First(user, user.Id).Error
 }
 
 func (r *Repository) Update(id uint, user *models.User) error {
 	if err := r.DB.First(&models.User{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("usuário com ID %d não encontrado", id)
+			return fmt.Errorf("usuário com Id %d não encontrado", id)
 		}
 		return fmt.Errorf("erro ao verificar usuário: %w", err)
 	}
@@ -85,7 +85,7 @@ func (r *Repository) Delete(id uint) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("usuário com ID %d não encontrado", id)
+		return fmt.Errorf("usuário com Id %d não encontrado", id)
 	}
 
 	return nil
