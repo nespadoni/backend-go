@@ -20,7 +20,7 @@ func NewMiddleware(permissionService *PermissionService) *Middleware {
 // RequirePermission verifica se o usuário tem a permissão necessária
 func (m *Middleware) RequirePermission(permission string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userIDStr := c.GetHeader("X-User-ID")
+		userIDStr := c.GetHeader("X-User-Id")
 		if userIDStr == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "usuário não autenticado"})
 			c.Abort()
@@ -29,7 +29,7 @@ func (m *Middleware) RequirePermission(permission string) gin.HandlerFunc {
 
 		userID, err := strconv.Atoi(userIDStr)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuário inválido"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Id de usuário inválido"})
 			c.Abort()
 			return
 		}
@@ -63,7 +63,7 @@ func (m *Middleware) RequirePermission(permission string) gin.HandlerFunc {
 // RequireLevel verifica se o usuário tem nível mínimo necessário
 func (m *Middleware) RequireLevel(minLevel int) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userIDStr := c.GetHeader("X-User-ID")
+		userIDStr := c.GetHeader("X-User-Id")
 		if userIDStr == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "usuário não autenticado"})
 			c.Abort()
@@ -72,7 +72,7 @@ func (m *Middleware) RequireLevel(minLevel int) gin.HandlerFunc {
 
 		userID, err := strconv.Atoi(userIDStr)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "ID de usuário inválido"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Id de usuário inválido"})
 			c.Abort()
 			return
 		}

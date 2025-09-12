@@ -3,6 +3,7 @@ package routes
 import (
 	"backend-go/config"
 	"backend-go/docs"
+	"backend-go/internal/auth"
 	"backend-go/internal/modules/athletic"
 	"backend-go/internal/modules/championship"
 	"backend-go/internal/modules/sport"
@@ -10,7 +11,9 @@ import (
 	"backend-go/internal/modules/user"
 	"backend-go/pkg/middleware"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
@@ -36,9 +39,24 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	r.Use(middleware.Logger())
 	r.Use(gin.Recovery())
 
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:4200", "http://127.0.0.1:4200"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	// Controladores
+	validate := validator.New()
+
+	userRepo := user.NewUserRepository(database)
+	authService := auth.NewAuthService(userRepo, validate, cfg.JWTSecret)
+	authController := auth.NewAuthController(authService)
+
 	championController := startChampionship(database)
-	userController := startUser(database)
+	userController := startUser(database, userRepo, validate)
 	universityController := startUniversity(database)
 	athleticController := startAthletic(database)
 	sportController := startSport(database)
@@ -52,59 +70,73 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	// Rotas da API
 	api := r.Group("/api")
 	{
-
-		championshipRoutes := api.Group("/championships")
+		authRoutes := api.Group("/auth")
 		{
-			championshipRoutes.GET("/", championController.FindAll)
-			championshipRoutes.GET("/:id", championController.FindById)
-			championshipRoutes.POST("/", championController.Create)
-			championshipRoutes.PUT("/:id", championController.Update)
-			championshipRoutes.PATCH("/:id/status", championController.UpdateStatus)
-			championshipRoutes.DELETE("/:id", championController.Delete)
+			authRoutes.POST("/register", authController.Register)
+			authRoutes.POST("/login", authController.Login)
 		}
 
-		userRoutes := api.Group("/users")
+		// Grupo de rotas protegidas pelo middleware JWT
+		authorized := api.Group("/")
+		authorized.Use(middleware.AuthMiddleware(cfg.JWTSecret))
 		{
-			userRoutes.GET("/:id", userController.FindById)
-			userRoutes.GET("/", userController.FindAll)
-			userRoutes.DELETE("/:id", userController.DeleteUser)
-			userRoutes.POST("/", userController.PostUser)
-			userRoutes.PUT("/:id", userController.UpdateUser)
+			championshipRoutes := authorized.Group("/championships")
+			{
+				championshipRoutes.POST("/", championController.Create)
+				championshipRoutes.PUT("/:id", championController.Update)
+				championshipRoutes.PATCH("/:id/status", championController.UpdateStatus)
+				championshipRoutes.DELETE("/:id", championController.Delete)
+			}
+
+			userRoutes := authorized.Group("/users")
+			{
+				userRoutes.GET("/:id", userController.FindById)
+				userRoutes.DELETE("/:id", userController.DeleteUser)
+				userRoutes.PUT("/:id", userController.UpdateUser)
+				userRoutes.POST("/profile-photo", userController.UploadProfilePhoto) // Nova rota
+			}
+
+			universityRoutes := authorized.Group("/universities")
+			{
+				universityRoutes.POST("/", universityController.Create)
+				universityRoutes.PUT("/:id", universityController.Update)
+				universityRoutes.DELETE("/:id", universityController.Delete)
+			}
+
+			athleticRoutes := authorized.Group("/athletics")
+			{
+				athleticRoutes.POST("/", athleticController.Create)
+				athleticRoutes.PUT("/:id", athleticController.Update)
+				athleticRoutes.PATCH("/:id/status", athleticController.UpdateStatus)
+				athleticRoutes.DELETE("/:id", athleticController.Delete)
+			}
+
+			sportRoutes := api.Group("/sports")
+			{
+				sportRoutes.GET("/", sportController.FindAll)
+				sportRoutes.GET("/popular", sportController.FindPopular)
+				sportRoutes.GET("/:id", sportController.FindById)
+				sportRoutes.POST("/", sportController.Create)
+				sportRoutes.PUT("/:id", sportController.Update)
+				sportRoutes.PATCH("/:id/status", sportController.UpdateStatus)
+				sportRoutes.DELETE("/:id", sportController.Delete)
+			}
 		}
 
-		universityRoutes := api.Group("/universities")
-		{
-			universityRoutes.GET("/", universityController.FindAll)
-			universityRoutes.GET("/:id", universityController.FindById)
-			universityRoutes.POST("/", universityController.Create)
-			universityRoutes.PUT("/:id", universityController.Update)
-			universityRoutes.DELETE("/:id", universityController.Delete)
-		}
-
-		athleticRoutes := api.Group("/athletics")
-		{
-			athleticRoutes.GET("/", athleticController.FindAll)
-			athleticRoutes.GET("/:id", athleticController.FindById)
-			athleticRoutes.POST("/", athleticController.Create)
-			athleticRoutes.PUT("/:id", athleticController.Update)
-			athleticRoutes.PATCH("/:id/status", athleticController.UpdateStatus)
-			athleticRoutes.DELETE("/:id", athleticController.Delete)
-		}
-
-		sportRoutes := api.Group("/sports")
-		{
-			sportRoutes.GET("/", sportController.FindAll)
-			sportRoutes.GET("/popular", sportController.FindPopular)
-			sportRoutes.GET("/:id", sportController.FindById)
-			sportRoutes.POST("/", sportController.Create)
-			sportRoutes.PUT("/:id", sportController.Update)
-			sportRoutes.PATCH("/:id/status", sportController.UpdateStatus)
-			sportRoutes.DELETE("/:id", sportController.Delete)
-		}
+		// Rotas públicas (que não precisam de login)
+		api.GET("/championships", championController.FindAll)
+		api.GET("/championships/:id", championController.FindById)
+		api.GET("/users", userController.FindAll)
+		api.GET("/universities", universityController.FindAll)
+		api.GET("/universities/:id", universityController.FindById)
+		api.GET("/athletics", athleticController.FindAll)
+		api.GET("/athletics/:id", athleticController.FindById)
 	}
 
 	// Rota do Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	r.Static("/uploads", "./uploads")
 
 	// Health check endpoint
 	r.GET("/health", func(c *gin.Context) {
@@ -132,12 +164,9 @@ func startChampionship(database *gorm.DB) championship.Controller {
 	return *championController
 }
 
-func startUser(database *gorm.DB) user.Controller {
-	validate := validator.New()
-	userRepo := user.NewUserRepository(database)
+func startUser(database *gorm.DB, userRepo *user.Repository, validate *validator.Validate) user.Controller {
 	userService := user.NewUserService(userRepo, validate)
 	userController := user.NewUserController(userService)
-
 	return *userController
 }
 

@@ -8,8 +8,9 @@ import (
 )
 
 type Config struct {
-	Port     string
-	Database DatabaseConfig
+	Port      string
+	Database  DatabaseConfig
+	JWTSecret string
 }
 
 type DatabaseConfig struct {
@@ -29,12 +30,13 @@ func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "8080"),
 		Database: DatabaseConfig{
-			Host:     getEnv("DB_HOST", "localhost"),
-			Port:     getEnv("DB_PORT", "5432"),
-			User:     getEnv("DB_USER", "postgres"),
-			Password: getEnv("DB_PASSWORD", "postgres"),
-			DBName:   getEnv("DB_NAME", "rivaly"),
+			Host:     getEnv("PGHOST", "localhost"),
+			Port:     getEnv("PGPORT", "5432"),
+			User:     getEnv("PGUSER", "postgres"),
+			Password: getEnv("PGPASSWORD", "postgres"),
+			DBName:   getEnv("PGDATABASE", "rivaly"),
 		},
+		JWTSecret: getEnv("JWT_SECRET", "default_secret_for_dev"),
 	}
 }
 

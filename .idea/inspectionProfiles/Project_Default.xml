@@ -22,6 +22,14 @@
         <function importPath="github.com/nespadoni/goerror/goerror" name="NovoErroBancoDados" />
       </functions>
     </inspection_tool>
+    <inspection_tool class="GoUnusedCallResult" enabled="true" level="WARNING" enabled_by_default="true">
+      <functions>
+        <function importPath="fmt" name="Sprint" />
+        <function importPath="sort" name="Reverse" />
+        <function importPath="errors" name="New" />
+        <function importPath="fmt" name="Sprintf" />
+      </functions>
+    </inspection_tool>
     <inspection_tool class="GrazieInspection" enabled="false" level="GRAMMAR_ERROR" enabled_by_default="false" />
   </profile>
 </component>
