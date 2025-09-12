@@ -38,12 +38,12 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 }
 
 // FindById godoc
-// @Summary Busca campeonato por ID
-// @Description Retorna campeonato específico pelo ID
+// @Summary Busca campeonato por Id
+// @Description Retorna campeonato específico pelo Id
 // @Tags championships
 // @Accept json
 // @Produce json
-// @Param id path string true "Championship ID"
+// @Param id path string true "Championship Id"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -54,7 +54,7 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_championship_id",
-			Message: "ID do campeonato deve ser um número válido",
+			Message: "Id do campeonato deve ser um número válido",
 		})
 		return
 	}
@@ -107,7 +107,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 // @Tags championships
 // @Accept json
 // @Produce json
-// @Param id path string true "Championship ID"
+// @Param id path string true "Championship Id"
 // @Param championship body UpdateRequest true "Championship data"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
@@ -120,7 +120,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_championship_id",
-			Message: "ID do campeonato deve ser um número válido",
+			Message: "Id do campeonato deve ser um número válido",
 		})
 		return
 	}
@@ -158,7 +158,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 // @Tags championships
 // @Accept json
 // @Produce json
-// @Param id path string true "Championship ID"
+// @Param id path string true "Championship Id"
 // @Param status body UpdateStatusRequest true "Status data"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
@@ -170,7 +170,7 @@ func (c *Controller) UpdateStatus(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_championship_id",
-			Message: "ID do campeonato deve ser um número válido",
+			Message: "Id do campeonato deve ser um número válido",
 		})
 		return
 	}
@@ -209,7 +209,7 @@ func (c *Controller) UpdateStatus(ctx *gin.Context) {
 // @Tags championships
 // @Accept json
 // @Produce json
-// @Param id path string true "Championship ID"
+// @Param id path string true "Championship Id"
 // @Success 204 "No Content"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -220,7 +220,7 @@ func (c *Controller) Delete(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_championship_id",
-			Message: "ID do campeonato deve ser um número válido",
+			Message: "Id do campeonato deve ser um número válido",
 		})
 		return
 	}

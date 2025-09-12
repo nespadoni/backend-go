@@ -61,12 +61,12 @@ func (c *Controller) FindPopular(ctx *gin.Context) {
 }
 
 // FindById godoc
-// @Summary Busca esporte por ID
-// @Description Retorna um esporte específico pelo seu ID
+// @Summary Busca esporte por Id
+// @Description Retorna um esporte específico pelo seu Id
 // @Tags sports
 // @Accept json
 // @Produce json
-// @Param id path string true "Sport ID"
+// @Param id path string true "Sport Id"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -77,7 +77,7 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_sport_id",
-			Message: "ID do esporte deve ser um número válido",
+			Message: "Id do esporte deve ser um número válido",
 		})
 		return
 	}
@@ -132,7 +132,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 // @Tags sports
 // @Accept json
 // @Produce json
-// @Param id path string true "Sport ID"
+// @Param id path string true "Sport Id"
 // @Param sport body UpdateRequest true "Sport data"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
@@ -144,7 +144,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_sport_id",
-			Message: "ID do esporte deve ser um número válido",
+			Message: "Id do esporte deve ser um número válido",
 		})
 		return
 	}
@@ -176,7 +176,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 // @Tags sports
 // @Accept json
 // @Produce json
-// @Param id path string true "Sport ID"
+// @Param id path string true "Sport Id"
 // @Param status body UpdateStatusRequest true "Status data"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
@@ -188,7 +188,7 @@ func (c *Controller) UpdateStatus(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_sport_id",
-			Message: "ID do esporte deve ser um número válido",
+			Message: "Id do esporte deve ser um número válido",
 		})
 		return
 	}
@@ -220,7 +220,7 @@ func (c *Controller) UpdateStatus(ctx *gin.Context) {
 // @Tags sports
 // @Accept json
 // @Produce json
-// @Param id path string true "Sport ID"
+// @Param id path string true "Sport Id"
 // @Success 204 "No Content"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -231,7 +231,7 @@ func (c *Controller) Delete(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_sport_id",
-			Message: "ID do esporte deve ser um número válido",
+			Message: "Id do esporte deve ser um número válido",
 		})
 		return
 	}

@@ -32,7 +32,7 @@ func (r *Repository) FindById(id uint) (models.University, error) {
 
 	if err := r.DB.First(&university, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.University{}, fmt.Errorf("universidade com ID %d não encontrada", id)
+			return models.University{}, fmt.Errorf("universidade com Id %d não encontrada", id)
 		}
 		return models.University{}, fmt.Errorf("erro ao buscar universidade: %w", err)
 	}
@@ -44,14 +44,14 @@ func (r *Repository) Create(university *models.University) error {
 		return fmt.Errorf("erro ao registrar universidade no banco de dados: %w", err)
 	}
 
-	return r.DB.First(university, university.ID).Error
+	return r.DB.First(university, university.Id).Error
 }
 
 func (r *Repository) Update(id uint, university *models.University) (*models.University, error) {
 	// Verificar se existe
 	if err := r.DB.First(&models.University{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("universidade com ID %d não encontrada", id)
+			return nil, fmt.Errorf("universidade com Id %d não encontrada", id)
 		}
 		return nil, fmt.Errorf("erro ao verificar universidade: %w", err)
 	}
@@ -78,7 +78,7 @@ func (r *Repository) Delete(id uint) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("universidade com ID %d não encontrada", id)
+		return fmt.Errorf("universidade com Id %d não encontrada", id)
 	}
 
 	return nil

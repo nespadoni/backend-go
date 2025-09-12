@@ -62,7 +62,7 @@ func (s *Service) Create(university CreateRequest) (Response, error) {
 		return Response{}, fmt.Errorf("erro ao criar universidade: %w", err)
 	}
 
-	createdUniversity, err := s.repo.FindById(newUniversity.ID)
+	createdUniversity, err := s.repo.FindById(newUniversity.Id)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro ao buscar universidade criada: %w", err)
 	}
@@ -100,7 +100,7 @@ func (s *Service) Update(id uint, req UpdateRequest) (Response, error) {
 
 func (s *Service) Delete(id uint) error {
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço ao deletar universidade com ID %d: %w", id, err)
+		return fmt.Errorf("erro no serviço ao deletar universidade com Id %d: %w", id, err)
 	}
 	return nil
 }

@@ -68,7 +68,7 @@ func (s *Service) Create(championship CreateRequest) (Response, error) {
 		return Response{}, fmt.Errorf("erro ao criar campeonato: %w", err)
 	}
 
-	createdChampionship, err := s.repo.FindById(newChampionship.ID)
+	createdChampionship, err := s.repo.FindById(newChampionship.Id)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro ao buscar campeonato criado: %w", err)
 	}
@@ -136,7 +136,7 @@ func (s *Service) UpdateStatus(id uint, req UpdateStatusRequest) (Response, erro
 func (s *Service) Delete(id uint) error {
 
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço de deletar campeonato com ID %d: %w", id, err)
+		return fmt.Errorf("erro no serviço de deletar campeonato com Id %d: %w", id, err)
 	}
 
 	return nil

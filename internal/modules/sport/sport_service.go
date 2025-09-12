@@ -70,7 +70,7 @@ func (s *Service) Create(req CreateRequest) (Response, error) {
 	}
 
 	// Buscar o esporte criado
-	createdSport, err := s.repo.FindById(newSport.ID)
+	createdSport, err := s.repo.FindById(newSport.Id)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro ao buscar esporte criado: %w", err)
 	}
@@ -138,7 +138,7 @@ func (s *Service) UpdateStatus(id uint, req UpdateStatusRequest) (Response, erro
 
 func (s *Service) Delete(id uint) error {
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço ao deletar esporte com ID %d: %w", id, err)
+		return fmt.Errorf("erro no serviço ao deletar esporte com Id %d: %w", id, err)
 	}
 	return nil
 }

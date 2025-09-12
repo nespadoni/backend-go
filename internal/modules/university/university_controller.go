@@ -39,12 +39,12 @@ func (c *Controller) FindAll(ctx *gin.Context) {
 }
 
 // FindById godoc
-// @Summary Busca universidade por ID
-// @Description Retorna uma universidade específica pelo seu ID
+// @Summary Busca universidade por Id
+// @Description Retorna uma universidade específica pelo seu Id
 // @Tags universities
 // @Accept json
 // @Produce json
-// @Param id path string true "University ID"
+// @Param id path string true "University Id"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -55,7 +55,7 @@ func (c *Controller) FindById(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_university_id",
-			Message: "ID da universidade deve ser um número válido",
+			Message: "Id da universidade deve ser um número válido",
 		})
 		return
 	}
@@ -110,7 +110,7 @@ func (c *Controller) Create(ctx *gin.Context) {
 // @Tags universities
 // @Accept json
 // @Produce json
-// @Param id path string true "University ID"
+// @Param id path string true "University Id"
 // @Param university body UpdateRequest true "University data"
 // @Success 200 {object} Response
 // @Failure 400 {object} utils.ErrorResponse
@@ -122,7 +122,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_university_id",
-			Message: "ID da universidade deve ser um número válido",
+			Message: "Id da universidade deve ser um número válido",
 		})
 		return
 	}
@@ -161,7 +161,7 @@ func (c *Controller) Update(ctx *gin.Context) {
 // @Tags universities
 // @Accept json
 // @Produce json
-// @Param id path string true "University ID"
+// @Param id path string true "University Id"
 // @Success 204 "No Content"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 404 {object} utils.ErrorResponse
@@ -172,7 +172,7 @@ func (c *Controller) Delete(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, utils.ErrorResponse{
 			Error:   "invalid_university_id",
-			Message: "ID da universidade deve ser um número válido",
+			Message: "Id da universidade deve ser um número válido",
 		})
 		return
 	}

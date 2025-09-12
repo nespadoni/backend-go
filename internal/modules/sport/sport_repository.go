@@ -32,7 +32,7 @@ func (r *Repository) FindById(id uint) (models.Sport, error) {
 
 	if err := r.DB.Preload("Positions").First(&sport, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.Sport{}, fmt.Errorf("esporte com ID %d não encontrado", id)
+			return models.Sport{}, fmt.Errorf("esporte com Id %d não encontrado", id)
 		}
 		return models.Sport{}, fmt.Errorf("erro ao buscar esporte: %w", err)
 	}
@@ -67,7 +67,7 @@ func (r *Repository) Create(sport *models.Sport) error {
 			return fmt.Errorf("erro ao criar esporte: %w", err)
 		}
 
-		return tx.Preload("Positions").First(sport, sport.ID).Error
+		return tx.Preload("Positions").First(sport, sport.Id).Error
 	})
 }
 
@@ -75,7 +75,7 @@ func (r *Repository) Update(id uint, sport *models.Sport) (*models.Sport, error)
 	// Verificar se existe
 	if err := r.DB.First(&models.Sport{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("esporte com ID %d não encontrado", id)
+			return nil, fmt.Errorf("esporte com Id %d não encontrado", id)
 		}
 		return nil, fmt.Errorf("erro ao verificar esporte: %w", err)
 	}
@@ -102,7 +102,7 @@ func (r *Repository) Delete(id uint) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("esporte com ID %d não encontrado", id)
+		return fmt.Errorf("esporte com Id %d não encontrado", id)
 	}
 
 	return nil

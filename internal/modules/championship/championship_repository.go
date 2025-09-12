@@ -34,7 +34,7 @@ func (r *Repository) FindById(id uint) (models.Championship, error) {
 
 	if err := r.DB.Preload("Athletic").First(&championship, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.Championship{}, fmt.Errorf("campeonato com ID %d não encontrado", id)
+			return models.Championship{}, fmt.Errorf("campeonato com Id %d não encontrado", id)
 		}
 		return models.Championship{}, fmt.Errorf("erro ao buscar campeonato: %w", err)
 	}
@@ -58,7 +58,7 @@ func (r *Repository) Update(id uint, championship *models.Championship) (*models
 	// Verificar se existe no DB
 	if err := r.DB.First(&models.Championship{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("campeonato com ID %d não encontrado", id)
+			return nil, fmt.Errorf("campeonato com Id %d não encontrado", id)
 		}
 		return nil, fmt.Errorf("erro ao verificar campeonato: %w", err)
 	}
