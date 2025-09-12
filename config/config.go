@@ -14,7 +14,6 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
-	URL      string
 	Host     string
 	Port     string
 	User     string
@@ -31,10 +30,11 @@ func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "8080"),
 		Database: DatabaseConfig{
-			URL:  getEnv("DATABASE_URL", "postgresql://postgres:qLnjqwrWVBxPJiFAeluNLlfGRTCizIGZ@postgres.railway.internal:5432/rivaly"),
-			Host: getEnv("PGHOST", "postgres.railway.internal"),
-			Port: getEnv("PGPORT", "5432"),
-			User: getEnv("PGUSER", "postgres"),
+			Host:     getEnv("PGHOST", "postgres.railway.internal"),
+			Port:     getEnv("PGPORT", "5432"),
+			User:     getEnv("PGUSER", "postgres"),
+			Password: getEnv("PGPASSWORD", ""),
+			DBName:   getEnv("PGDATABASE", "railway"),
 		},
 		JWTSecret: getEnv("JWT_SECRET", "default_secret_for_dev"),
 	}
