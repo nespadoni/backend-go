@@ -31,7 +31,7 @@ func (r *Repository) FindById(athleticId uint) (models.Athletic, error) {
 
 	if err := r.DB.Preload("University").Preload("Creator").First(&athletic, athleticId).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return models.Athletic{}, fmt.Errorf("atletica com ID %d não encontrado", athleticId)
+			return models.Athletic{}, fmt.Errorf("atletica com Id %d não encontrado", athleticId)
 		}
 		return models.Athletic{}, fmt.Errorf("erro ao buscar atletica: %w", err)
 	}
@@ -57,7 +57,7 @@ func (r *Repository) Create(athletic *models.Athletic) error {
 		}
 
 		// Carregar a atlética criada com relacionamentos
-		return tx.Preload("University").Preload("Creator").First(athletic, athletic.ID).Error
+		return tx.Preload("University").Preload("Creator").First(athletic, athletic.Id).Error
 	})
 }
 
@@ -65,7 +65,7 @@ func (r *Repository) Update(id uint, athletic *models.Athletic) (*models.Athleti
 	// Verificar se a atlética existe no DB
 	if err := r.DB.First(&models.Athletic{}, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, fmt.Errorf("atlética com ID %d não encontrada", id)
+			return nil, fmt.Errorf("atlética com Id %d não encontrada", id)
 		}
 		return nil, fmt.Errorf("erro ao verificar atlética: %w", err)
 	}
@@ -91,7 +91,7 @@ func (r *Repository) Delete(id uint) error {
 	}
 
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("atlética com ID %d não encontrada", id)
+		return fmt.Errorf("atlética com Id %d não encontrada", id)
 	}
 
 	return nil

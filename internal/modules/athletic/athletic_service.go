@@ -62,7 +62,7 @@ func (s *Service) Create(athletic CreateRequest) (Response, error) {
 		return Response{}, fmt.Errorf("erro ao criar atletica: %w", err)
 	}
 
-	createdAthletic, err := s.repo.FindById(newAthletic.ID)
+	createdAthletic, err := s.repo.FindById(newAthletic.Id)
 	if err != nil {
 		return Response{}, fmt.Errorf("erro ao buscar atletica criada: %w", err)
 	}
@@ -123,7 +123,7 @@ func (s *Service) UpdateStatus(id uint, req UpdateStatusRequest) (Response, erro
 
 func (s *Service) Delete(id uint) error {
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço ao deletar atlética com ID %d: %w", id, err)
+		return fmt.Errorf("erro no serviço ao deletar atlética com Id %d: %w", id, err)
 	}
 	return nil
 }
