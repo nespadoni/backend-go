@@ -35,18 +35,44 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 
 	r := gin.New()
 
-	// Middlewares
+	// Middlewares básicos
 	r.Use(middleware.Logger())
 	r.Use(gin.Recovery())
 
+	// CORS configuração corrigida para Railway
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"http://localhost:4200", "http://127.0.0.1:4200", "https://rivaly.up.railway.app",
-			"https://front-web.railway.internal"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowOrigins: []string{
+			"http://localhost:4200",
+			"http://127.0.0.1:4200",
+			"https://rivaly.up.railway.app",
+			"https://front-web.railway.internal", // Adicionar domínio interno
+		},
+		AllowMethods: []string{
+			"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS",
+		},
+		AllowHeaders: []string{
+			"Origin",
+			"Content-Length",
+			"Content-Type",
+			"Authorization",
+			"Accept",
+			"Accept-Encoding",
+			"Cache-Control",
+			"Connection",
+			"DNT",
+			"Host",
+			"Pragma",
+			"Referer",
+			"User-Agent",
+			"X-Requested-With",
+		},
+		ExposeHeaders: []string{
+			"Content-Length",
+			"Access-Control-Allow-Origin",
+			"Access-Control-Allow-Headers",
+		},
 		AllowCredentials: true,
-		AllowWildcard:    false,
+		AllowWildcard:    false, // Importante para Railway
 		MaxAge:           12 * time.Hour,
 	}))
 
@@ -75,8 +101,6 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	universityController := startUniversity(database)
 	athleticController := startAthletic(database)
 	sportController := startSport(database)
-	//permissionService := auth.NewPermissionService(database)
-	//authMiddleware := auth.NewMiddleware(permissionService)
 
 	// Configuração do Swagger para Railway
 	docs.SwaggerInfo.BasePath = "/api"
@@ -86,14 +110,41 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 		docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	}
 
+	// Health check endpoint (primeira rota para teste)
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":  "ok",
+			"message": "API está funcionando!",
+			"cors":    "enabled",
+		})
+	})
+
 	// Rotas da API
 	api := r.Group("/api")
 	{
+		// Rotas de autenticação
 		authRoutes := api.Group("/auth")
 		{
 			authRoutes.POST("/register", authController.Register)
 			authRoutes.POST("/login", authController.Login)
 		}
+
+		// ROTAS PÚBLICAS (SEM AUTENTICAÇÃO) - MOVIDAS PARA CIMA
+		api.GET("/championships", championController.FindAll)
+		api.GET("/championships/:id", championController.FindById)
+		api.GET("/users", userController.FindAll)
+
+		// ROTA UNIVERSITIES PÚBLICA (ESTA É A QUE ESTÁ FALHANDO)
+		api.GET("/universities", universityController.FindAll)
+		api.GET("/universities/:id", universityController.FindById)
+
+		api.GET("/athletics", athleticController.FindAll)
+		api.GET("/athletics/:id", athleticController.FindById)
+
+		// Rotas de esportes públicas
+		api.GET("/sports", sportController.FindAll)
+		api.GET("/sports/popular", sportController.FindPopular)
+		api.GET("/sports/:id", sportController.FindById)
 
 		// Grupo de rotas protegidas pelo middleware JWT
 		authorized := api.Group("/")
@@ -112,7 +163,7 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 				userRoutes.GET("/:id", userController.FindById)
 				userRoutes.DELETE("/:id", userController.DeleteUser)
 				userRoutes.PUT("/:id", userController.UpdateUser)
-				userRoutes.POST("/profile-photo", userController.UploadProfilePhoto) // Nova rota
+				userRoutes.POST("/profile-photo", userController.UploadProfilePhoto)
 			}
 
 			universityRoutes := authorized.Group("/universities")
@@ -130,45 +181,33 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 				athleticRoutes.DELETE("/:id", athleticController.Delete)
 			}
 
-			sportRoutes := api.Group("/sports")
+			sportRoutes := authorized.Group("/sports")
 			{
-				sportRoutes.GET("/", sportController.FindAll)
-				sportRoutes.GET("/popular", sportController.FindPopular)
-				sportRoutes.GET("/:id", sportController.FindById)
 				sportRoutes.POST("/", sportController.Create)
 				sportRoutes.PUT("/:id", sportController.Update)
 				sportRoutes.PATCH("/:id/status", sportController.UpdateStatus)
 				sportRoutes.DELETE("/:id", sportController.Delete)
 			}
 		}
-
-		// Rotas públicas (que não precisam de login)
-		api.GET("/championships", championController.FindAll)
-		api.GET("/championships/:id", championController.FindById)
-		api.GET("/users", userController.FindAll)
-		api.GET("/universities", universityController.FindAll)
-		api.GET("/universities/:id", universityController.FindById)
-		api.GET("/athletics", athleticController.FindAll)
-		api.GET("/athletics/:id", athleticController.FindById)
 	}
 
 	// Rota do Swagger
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Servir arquivos estáticos
 	r.Static("/uploads", "./uploads")
 
-	// Health check endpoint
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":  "ok",
-			"message": "API está funcionando!",
-		})
-	})
+	// Log das configurações
+	log.Printf("CORS configurado para: https://rivaly.up.railway.app")
+	log.Printf("Servidor rodando na porta: %s", cfg.Port)
+
+	if cfg.Port == "80" || cfg.Port == "443" {
+		log.Printf("Swagger disponível em https://backend-go-production-c4f4.up.railway.app/swagger/index.html")
+	} else {
+		log.Printf("Swagger disponível em http://localhost:%s/swagger/index.html", cfg.Port)
+	}
 
 	// Inicia o servidor
-	log.Printf("Servidor rodando em http://localhost:%s", cfg.Port)
-	log.Printf("Swagger disponível em http://localhost:%s/swagger/index.html", cfg.Port)
-
 	if err := r.Run(":" + cfg.Port); err != nil {
 		log.Fatalf("Erro ao iniciar servidor: %v", err)
 	}
