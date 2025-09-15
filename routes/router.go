@@ -40,13 +40,28 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	r.Use(gin.Recovery())
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:4200", "http://127.0.0.1:4200", "https://rivaly.up.railway.app"},
+		AllowOrigins: []string{"http://localhost:4200", "http://127.0.0.1:4200", "https://rivaly.up.railway.app",
+			"https://front-web.railway.internal"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
+		AllowWildcard:    false,
 		MaxAge:           12 * time.Hour,
 	}))
+
+	// Middleware adicional para tratar preflight requests
+	r.Use(func(c *gin.Context) {
+		if c.Request.Method == "OPTIONS" {
+			c.Header("Access-Control-Allow-Origin", "https://rivaly.up.railway.app")
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Origin, Content-Length, Content-Type, Authorization")
+			c.Header("Access-Control-Max-Age", "86400")
+			c.Status(200)
+			return
+		}
+		c.Next()
+	})
 
 	// Controladores
 	validate := validator.New()
@@ -63,9 +78,13 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	//permissionService := auth.NewPermissionService(database)
 	//authMiddleware := auth.NewMiddleware(permissionService)
 
-	// Configuração do Swagger
+	// Configuração do Swagger para Railway
 	docs.SwaggerInfo.BasePath = "/api"
-	docs.SwaggerInfo.Host = "localhost" + cfg.Port
+	if cfg.Port == "80" || cfg.Port == "443" {
+		docs.SwaggerInfo.Host = "backend-go-production-c4f4.up.railway.app"
+	} else {
+		docs.SwaggerInfo.Host = "localhost:" + cfg.Port
+	}
 
 	// Rotas da API
 	api := r.Group("/api")
