@@ -146,10 +146,13 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 		api.GET("/sports/popular", sportController.FindPopular)
 		api.GET("/sports/:id", sportController.FindById)
 
-		api.GET("/:id", userController.FindById)
-		api.DELETE("/:id", userController.DeleteUser)
-		api.PUT("/:id", userController.UpdateUser)
-		api.POST("/profile-photo", userController.UploadProfilePhoto)
+		usersRoutes := api.Group("/users")
+		{
+			usersRoutes.GET("/:id", userController.FindById)
+			usersRoutes.PUT("/:id", userController.UpdateUser)
+			usersRoutes.POST("/profile-photo", userController.UploadProfilePhoto)
+			usersRoutes.DELETE("/:id", userController.DeleteUser)
+		}
 
 		// Grupo de rotas protegidas pelo middleware JWT
 		authorized := api.Group("/")
