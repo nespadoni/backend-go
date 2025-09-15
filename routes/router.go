@@ -40,7 +40,7 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	r.Use(gin.Recovery())
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:4200", "http://127.0.0.1:4200"},
+		AllowOrigins:     []string{"http://localhost:4200", "http://127.0.0.1:4200", "https://rivaly.up.railway.app"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
