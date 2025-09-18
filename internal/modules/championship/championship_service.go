@@ -19,7 +19,6 @@ func NewChampionshipService(repo *Repository, validate *validator.Validate) *Ser
 		repo:     repo,
 		validate: validate,
 	}
-
 }
 
 func (s *Service) FindAll() ([]ListResponse, error) {
@@ -134,7 +133,6 @@ func (s *Service) UpdateStatus(id uint, req UpdateStatusRequest) (Response, erro
 }
 
 func (s *Service) Delete(id uint) error {
-
 	if err := s.repo.Delete(id); err != nil {
 		return fmt.Errorf("erro no serviço de deletar campeonato com Id %d: %w", id, err)
 	}
