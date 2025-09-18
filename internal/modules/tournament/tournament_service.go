@@ -104,7 +104,7 @@ func (s *Service) Update(id uint, req UpdateRequest) (Response, error) {
 
 func (s *Service) Delete(id uint) error {
 	if err := s.repo.Delete(id); err != nil {
-		return fmt.Errorf("erro no serviço de deletar campeonato com Id %d: %v", err)
+		return fmt.Errorf("erro no serviço de deletar campeonato com Id %d: %v", id, err)
 	}
 	return nil
 }
