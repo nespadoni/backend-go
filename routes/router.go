@@ -79,7 +79,7 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	// Middleware adicional para tratar preflight requests
 	r.Use(func(c *gin.Context) {
 		if c.Request.Method == "OPTIONS" {
-			c.Header("Access-Control-Allow-Origin", "https://rivaly.up.railway.app")
+			c.Header("Access-Control-Allow-Origin", "https://localhost:5432")
 			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS")
 			c.Header("Access-Control-Allow-Headers", "Origin, Content-Length, Content-Type, Authorization")
 			c.Header("Access-Control-Max-Age", "86400")
@@ -198,7 +198,7 @@ func InitRouter(database *gorm.DB, cfg *config.Config) {
 	r.Static("/uploads", "./uploads")
 
 	// Log das configurações
-	log.Printf("CORS configurado para: https://rivaly.up.railway.app")
+	log.Printf("CORS configurado para: http://localhost:8080")
 	log.Printf("Servidor rodando na porta: %s", cfg.Port)
 
 	if cfg.Port == "80" || cfg.Port == "443" {
