@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -19,7 +21,7 @@ func (r *BaseRepository) WithTransaction(fn func(db *gorm.DB) error) error {
 
 	if err := fn(tx); err != nil {
 		tx.Rollback()
-		return err
+		return fmt.Errorf("failed to execute rollback transaction: %w", err)
 	}
 
 	return tx.Commit().Error
