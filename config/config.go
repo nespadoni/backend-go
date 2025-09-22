@@ -31,12 +31,12 @@ func Load() *Config {
 	return &Config{
 		Port: getEnv("PORT", "8080"),
 		Database: DatabaseConfig{
-			URL:      getEnv("DATABASE_URL", ""),       // <-- Lê a variável do Railway
-			Host:     getEnv("PGHOST", "localhost"),    // Mantém para dev local
-			Port:     getEnv("PGPORT", "5432"),         // Mantém para dev local
-			User:     getEnv("PGUSER", "postgres"),     // Mantém para dev local
-			Password: getEnv("PGPASSWORD", "postgres"), // Mantém para dev local
-			DBName:   getEnv("POSTGRES_DB", "rivaly"),  // Mantém para dev local
+			URL:      getEnv("DATABASE_URL", ""),      // <-- Lê a variável do Railway
+			Host:     getEnv("PGHOST", "localhost"),   // Mantém para dev local
+			Port:     getEnv("PGPORT", "5432"),        // Mantém para dev local
+			User:     getEnv("PGUSER", "postgres"),    // Mantém para dev local
+			Password: getEnv("PGPASSWORD", "admin"),   // Mantém para dev local
+			DBName:   getEnv("POSTGRES_DB", "rivaly"), // Mantém para dev local
 		},
 		JWTSecret: getEnv("JWT_SECRET", "default_secret_for_dev"),
 	}

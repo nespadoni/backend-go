@@ -4,6 +4,7 @@ import (
 	"backend-go/config"
 	"backend-go/internal/models"
 	"backend-go/internal/seeders"
+	"fmt"
 	"log"
 
 	"gorm.io/driver/postgres"
@@ -12,7 +13,15 @@ import (
 )
 
 func InitDB(cfg config.DatabaseConfig) *gorm.DB {
-	const dsn = "postgresql://postgres:EEZkBTzCgVJYgpTayIhhjGAusQowAQLF@postgres.railway.internal:5432/railway"
+	var dsn string
+	// Verifica se a URL de conexão completa foi fornecida (padrão do Railway)
+	if cfg.URL != "" {
+		dsn = cfg.URL
+	} else {
+		// Se não, monta a string manualmente (para ambiente de desenvolvimento local)
+		dsn = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+			cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
+	}
 
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
