@@ -179,8 +179,8 @@ func (c *Controller) Delete(ctx *gin.Context) {
 
 	if err := c.universityService.Delete(uint(universityID)); err != nil {
 		ctx.JSON(http.StatusNotFound, utils.ErrorResponse{
-			Error:   "university_not_found",
-			Message: "Universidade não encontrada ou erro ao deletar",
+			Error:   "delete_university_failed",
+			Message: "Falha ao deletar universidade",
 		})
 		return
 	}
