@@ -84,14 +84,14 @@ func (s *Service) Update(id uint, req UpdateRequest) (Response, error) {
 		return Response{}, fmt.Errorf("datas inválidas: %v", err)
 	}
 
-	var torunament models.Tournament
-	if err := copier.Copy(&torunament, req); err != nil {
+	var tournament models.Tournament
+	if err := copier.Copy(&tournament, req); err != nil {
 		return Response{}, fmt.Errorf("erro ao copiar metodo copier: %v", err)
 	}
 
-	updatedTournament, err := s.repo.FindById(id)
+	updatedTournament, err := s.repo.Update(id, &tournament)
 	if err != nil {
-		return Response{}, fmt.Errorf("erro ao buscar torneio criado: %v", err)
+		return Response{}, fmt.Errorf("erro ao atualizar torneio: %v", err)
 	}
 
 	var tournamentResponse Response
