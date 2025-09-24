@@ -57,7 +57,7 @@ func (r *Repository) Update(id uint, university *models.University) (*models.Uni
 	}
 
 	// Atualizar
-	if err := r.DB.Model(&models.University{}).Where("id = ?", id).Updates(university).Error; err != nil {
+	if err := r.DB.Model(&university).Where("id = ?", id).Updates(university).Error; err != nil {
 		return nil, fmt.Errorf("erro ao atualizar universidade: %w", err)
 	}
 
