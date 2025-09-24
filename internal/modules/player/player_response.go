@@ -8,6 +8,7 @@ import (
 type Response struct {
 	Id         uint            `json:"id"`
 	Name       string          `json:"name"`
+	Nickname   *string         `json:"nickname"`
 	TeamID     int             `json:"team_id"`
 	Team       models.Team     `json:"team,omitempty"`
 	PositionID int             `json:"position_id"`
